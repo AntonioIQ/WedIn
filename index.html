@@ -1,88 +1,129 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Christian & José Antonio — Nuestra Boda</title>
-<meta name="description" content="Acompáñanos el 29 de noviembre de 2025. Detalles de ceremonia y confirmación de asistencia (RSVP)." />
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Montserrat:wght@300;400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css" />
-<link rel="icon" href="images/favicon.svg" type="image/svg+xml" />
-<!-- Social cards -->
-<meta property="og:title" content="Christian & José Antonio — Nuestra Boda" />
-<meta property="og:description" content="29 de noviembre de 2025 • Bosques de Aragón" />
-<meta property="og:image" content="images/cover.jpg" />
-<meta property="og:type" content="website" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Christian Areli & José Antonio — Nuestra Boda</title>
+  <meta name="description" content="Invitación de boda: fecha, historia, lugar, calendario y confirmación de asistencia." />
+  
+  <!-- Favicon -->
+  <link rel="icon" href="images/favicon.png" type="image/png">
+  
+  <!-- Meta tags para redes sociales -->
+  <meta property="og:title" content="Christian & José Antonio - Nuestra Boda">
+  <meta property="og:image" content="images/nosotros.jpg">
+  <meta property="og:description" content="29 de Noviembre, 2025">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Montserrat:wght@300;400&display=swap" rel="stylesheet">
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-<main class="container">
-<header class="header" role="banner">
-<h1>Christian Areli <span class="ampersand" aria-hidden="true">&</span> José Antonio</h1>
-<p class="kicker">Nos casamos</p>
-</header>
 
+  <!-- 💌 SOBRE -->
+  <div id="envelope-overlay" class="envelope-overlay">
+    <div class="envelope">
+      <img class="envelope__img" src="images/envelope.jpg" alt="Sobre de invitación con sello" />
+      <div class="envelope__text">
+        <h2>Estás invitado</h2>
+        <p class="envelope__desc">Haz clic en el sello para abrir</p>
+      </div>
+      <button id="openInvite" class="seal-hit" aria-label="Abrir invitación"></button>
+    </div>
+  </div>
 
-<section class="content" id="contenido">
-<div class="section intro">
-<p class="phrase">"Con su presencia y cálidos deseos,<br />nos acompañan en este nuevo comienzo"</p>
-<div class="divider" aria-hidden="true"></div>
-</div>
+  <!-- 🩶 HEADER -->
+  <header class="band band--header">
+    <div class="band__inner hero-content">
+      <h1>Christian Areli <span class="ampersand">&</span> José Antonio</h1>
+      <p class="kicker">Nos Casamos</p>
+      <p class="date-badge">
+        <span>29</span><span>•</span><span>NOV</span><span>•</span><span>2025</span>
+      </p>
+    </div>
+  </header>
 
+  <!-- 📸 NUESTRA FOTO -->
+  <section class="nuestra-foto">
+    <div class="foto-container">
+      <img src="images/nosotros.jpg" alt="Christian Areli y José Antonio sonriendo" />
+    </div>
+  </section>
 
-<div class="section date">
-<h2 class="info-title">Fecha</h2>
-<p class="date-highlight" aria-label="Veintinueve">29</p>
-<p class="info-detail">Noviembre • 2025</p>
-</div>
+  <!-- 🕊 CONTENIDO -->
+  <main class="container" id="contenido">
+    <section class="content">
 
+      <section class="section section--intro">
+        <p class="phrase">"Con su presencia y cálidos deseos,<br>nos acompañan en este nuevo comienzo."</p>
+        <div class="divider"></div>
+      </section>
 
-<div class="decorative-element" aria-hidden="true">
-<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-<path d="M50,20 L55,40 L75,40 L60,52 L65,72 L50,60 L35,72 L40,52 L25,40 L45,40 Z"/>
-</svg>
-</div>
+      <!-- NUESTRA HISTORIA -->
+      <section id="historia" class="section">
+        <h2 class="section-title">Nuestra historia</h2>
+        <div class="ornament ornament--branch">
+          <svg viewBox="0 0 200 32" width="200" height="32">
+            <path d="M0,16 H70 M130,16 H200" stroke="var(--leaf)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+            <path d="M90 16 c8-8 8-16 0-24 M90 16 c-8-8-8-16 0-24" transform="translate(10 20) scale(0.7) rotate(10)" stroke="var(--leaf)" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+            <path d="M90 16 c8-8 8-16 0-24 M90 16 c-8-8-8-16 0-24" transform="translate(100 20) scale(0.7) rotate(-10)" stroke="var(--leaf)" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="story-box">
+          <div id="historiaContent" class="story-text">
+            <p class="placeholder">Carga "<strong>historia.txt</strong>" en la raíz del sitio para mostrar su contenido aquí.</p>
+          </div>
+        </div>
+      </section>
 
+      <!-- CEREMONIA -->
+      <section id="ceremonia" class="section">
+        <div class="card card--info">
+          <header class="card__header"><h2 class="section-title">Ceremonia</h2></header>
+          <div class="card__body">
+            <p><strong>Hora:</strong> 4:30 PM</p>
+            <p><strong>Lugar:</strong><br>Bosques de los Continentes 4<br>Bosques de Aragón<br>57170 Cdad. Nezahualcóyotl, México</p>
+          </div>
+          <footer class="card__footer">
+            <a class="btn btn--coffee" target="_blank"
+               href="https://www.google.com/maps/search/?api=1&query=Bosques+de+los+Continentes+4+Bosques+de+Aragon+57170+Cdad+Nezahualcóyotl+México">Ver en el mapa</a>
+          </footer>
+        </div>
+      </section>
 
-<div class="info-box">
-<h2 class="info-title">Ceremonia</h2>
-<p class="info-detail">
-<strong>Hora:</strong> 4:30 PM<br /><br />
-<strong>Lugar:</strong><br />
-Bosques de los Continentes 4<br />
-Bosques de Aragón<br />
-57170 Cdad. Nezahualcóyotl, México
-</p>
-<a class="map-link" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Bosques+de+los+Continentes+4+Bosques+de+Aragon+57170+Cdad+Nezahualcóyotl+México">Ver en el mapa</a>
-</div>
+      <!-- CALENDARIO -->
+      <section id="calendario" class="section">
+        <div class="calendar card">
+          <div class="calendar__left">
+            <div class="calendar__day">29</div>
+            <div class="calendar__month">NOV</div>
+            <div class="calendar__year">2025</div>
+          </div>
+          <div class="calendar__right">
+            <h3>Agrega a tu agenda este día</h3>
+            <p>Guarda la fecha y no te pierdas ningún detalle.</p>
+            <a class="btn btn--coffee" href="images/nuestra-boda.ics" download>Agregar a mi calendario</a>
+          </div>
+        </div>
+      </section>
 
+    </section>
+  </main>
 
-<div class="section note">
-<p class="note-text">Será un honor compartir este día tan especial con ustedes. Su amor y apoyo significan todo para nosotros.</p>
-</div>
-</section>
+  <!-- RSVP -->
+  <section class="band band--rsvp">
+    <div class="band__inner">
+      <h2 class="section-title section-title--light">Confirma tu asistencia</h2>
+      <p>Por favor confirma antes del <strong>15 de noviembre</strong>.</p>
+      <a href="#" class="btn btn--slate" id="rsvpBtn">Confirmar asistencia</a>
+    </div>
+  </section>
 
-
-<section class="rsvp-section" aria-labelledby="rsvp-title">
-<h2 id="rsvp-title">Confirma tu asistencia</h2>
-<p>Por favor confirma antes del <strong>15 de noviembre</strong>.</p>
-<a href="#" class="rsvp-button" id="rsvpBtn">Confirmar asistencia</a>
-<p class="alt-link">
-¿No te abre el formulario? <a id="rsvpFallback" href="#">Usa este enlace</a>
-</p>
-</section>
-
-
-<footer class="footer">
-Christian & José Antonio • 29 de Noviembre, 2025
-<div class="ics">
-<a href="images/nuestra-boda.ics" download>📅 Agregar a mi calendario (.ics)</a>
-</div>
-</footer>
-</main>
-
-
-<script src="script.js" defer></script>
+  <footer class="footer">Areli & Toño • 29 de Noviembre, 2025</footer>
+  <script src="script.js" defer></script>
 </body>
-</html><!-- trigger lun 13 oct 2025 14:54:31 CST -->
+</html>
