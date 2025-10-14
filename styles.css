@@ -75,7 +75,7 @@ body.opened .envelope-overlay{opacity:0;visibility:hidden;pointer-events:none}
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  opacity: 0.06; /* MUY sutil - ajusta entre 0.03 y 0.15 */
+  opacity: 0.13; /* MUY sutil - ajusta entre 0.03 y 0.15 */
   pointer-events: none;
   z-index: 0;
 }
