@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Christian Areli & José Antonio — Nuestra Boda</title>
+  <title>Christian Areli & José Antonio – Nuestra Boda</title>
   <meta name="description" content="Invitación de boda: fecha, historia, lugar, calendario y confirmación de asistencia." />
   
   <!-- Favicon -->
@@ -27,23 +27,44 @@
   <!-- 💌 SOBRE -->
   <div id="envelope-overlay" class="envelope-overlay">
     <div class="envelope">
-      <img class="envelope__img" src="images/envelope.jpg" alt="Sobre de invitación con sello" />
+      <!-- Sobre cerrado -->
+      <img class="envelope__img envelope__img--closed" src="images/envelope.jpg" alt="Sobre de invitación cerrado" />
+      <!-- Sobre abierto -->
+      <img class="envelope__img envelope__img--open" src="images/envelope-open.jpg" alt="Sobre de invitación abierto" />
+      <!-- Texto SOLO en el sobre cerrado -->
       <div class="envelope__text">
         <h2>Estás invitado</h2>
-        <p class="envelope__desc">Toca sello para abrir</p>
+        <p class="envelope__desc">Toca el sello para abrir</p>
       </div>
       <button id="openInvite" class="seal-hit" aria-label="Abrir invitación"></button>
     </div>
   </div>
 
-  <!-- 🩶 HEADER -->
+  <!-- 💖 HEADER CON EFECTOS ESPECTACULARES -->
   <header class="band band--header">
     <div class="band__inner hero-content">
-      <h1>Christian Areli <span class="ampersand">&</span> José Antonio</h1>
-      <p class="kicker">Nos Casamos</p>
-      <p class="date-badge">
-        <span>29</span><span>•</span><span>NOV</span><span>•</span><span>2025</span>
-      </p>
+      
+      <!-- NOMBRES CON EFECTO DE BRILLO Y REVELADO -->
+      <div class="names-container">
+        <h1>
+          <span class="name-glow" data-text="Christian Areli">Christian Areli</span> 
+          <span class="ampersand">&</span> 
+          <span class="name-glow" data-text="José Antonio">José Antonio</span>
+        </h1>
+      </div>
+      
+      <!-- "NOS CASAMOS" CON LÍNEAS DECORATIVAS -->
+      <div class="wedding-announcement">
+        <p class="kicker">Nos Casamos</p>
+      </div>
+      
+      <!-- FECHA CON EFECTOS -->
+      <div class="date-container">
+        <p class="date-badge">
+          <span>29</span><span>•</span><span>NOV</span><span>•</span><span>2025</span>
+        </p>
+      </div>
+      
     </div>
   </header>
 
@@ -80,13 +101,40 @@
         </div>
       </section>
 
-      <!-- CEREMONIA -->
+      <!-- CEREMONIA CON ITINERARIO -->
       <section id="ceremonia" class="section">
         <div class="card card--info">
           <header class="card__header"><h2 class="section-title">Ceremonia</h2></header>
           <div class="card__body">
             <p><strong>Hora:</strong> 4:30 PM</p>
             <p><strong>Lugar:</strong><br>Bosques de los Continentes 4<br>Bosques de Aragón<br>57170 Cdad. Nezahualcóyotl, México</p>
+            
+            <!-- ITINERARIO DEL DÍA -->
+            <div class="itinerario">
+              <h3 class="itinerario-title">Itinerario del Día</h3>
+              <ul class="itinerario-list">
+                <li class="itinerario-item">
+                  <strong>Recepción</strong>
+                  <p>Bienvenida con copa de honor</p>
+                </li>
+                <li class="itinerario-item">
+                  <strong>Acto Civil</strong>
+                  <p>Unión legal y brindis de felicitación</p>
+                </li>
+                <li class="itinerario-item">
+                  <strong>Bendición y Votos</strong>
+                  <p>Bendición familiar e intercambio de promesas<br>Mensaje pastoral</p>
+                </li>
+                <li class="itinerario-item">
+                  <strong>Cena de Celebración</strong>
+                  <p>Banquete y brindis de nuestros invitados</p>
+                </li>
+                <li class="itinerario-item">
+                  <strong>Corte del Pastel</strong>
+                  <p>Símbolo de nuestro dulce comienzo</p>
+                </li>
+              </ul>
+            </div>
           </div>
           <footer class="card__footer">
             <a class="btn btn--coffee" target="_blank"

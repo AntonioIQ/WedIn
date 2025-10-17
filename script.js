@@ -1,5 +1,5 @@
 // ================== CONFIG ==================
-const FORM_URL_BASE = "https://forms.office.com/Pages/ResponsePage.aspx?id=DQSIkWdsW0yxEjajBLZtrQAAAAAAAAAAAAZ__oZGHM5UMVlCQUVCWUNFUEZORDNMVzRMMFJTV0NRVS4u"; // <-- pon tu URL real
+const FORM_URL_BASE = "https://forms.office.com/Pages/ResponsePage.aspx?id=DQSIkWdsW0yxEjajBLZtrQAAAAAAAAAAAAZ__oZGHM5UMVlCQUVCWUNFUEZORDNMVzRMMFJTV0NRVS4u";
 const FORM_PREFILL_KEYS = ["nombre", "pases", "mesa", "invitacion"];
 
 // ================== HELPERS ==================
@@ -63,17 +63,102 @@ function wireRSVPButton(){
   btn.addEventListener("click", e=>{ e.preventDefault(); openRSVP({}); });
 }
 
-// ================== SOBRE ==================
+// ================== SOBRE - ANIMACIÓN SUPER SUAVE ==================
 function openInvitation(){
   if (document.body.classList.contains("opened")) return;
-  document.body.classList.add("opened");
-  const main=$("main"); if(main){ main.setAttribute("tabindex","-1"); main.focus(); }
+  
+  console.log("🔓 Iniciando transición suave...");
+  
+  const envelope = $(".envelope");
+  const sealBtn = $("#openInvite");
+  
+  if (envelope) {
+    // Pre-asegurar que las imágenes estén cargadas
+    const closedImg = $(".envelope__img--closed");
+    const openImg = $(".envelope__img--open");
+    
+    // Forzar el renderizado de ambas imágenes
+    if (closedImg) closedImg.style.willChange = "opacity, transform, filter";
+    if (openImg) openImg.style.willChange = "opacity, transform, filter";
+    
+    // Iniciar animación de apertura
+    envelope.classList.add("opening");
+    
+    // Deshabilitar el botón inmediatamente
+    if (sealBtn) {
+      sealBtn.style.pointerEvents = "none";
+    }
+    
+    // Esperar a que termine la transición suave
+    setTimeout(() => {
+      console.log("🎉 Transición completada, mostrando invitación...");
+      
+      // Agregar la clase que oculta el sobre
+      document.body.classList.add("opened");
+      
+      // Limpiar will-change después de la animación
+      if (closedImg) closedImg.style.willChange = "auto";
+      if (openImg) openImg.style.willChange = "auto";
+      
+      // Hacer scroll al inicio suavemente
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      
+      // Focus para accesibilidad
+      const header = $("header"); 
+      if(header){ 
+        header.setAttribute("tabindex","-1"); 
+        setTimeout(() => {
+          header.focus();
+          header.removeAttribute("tabindex");
+        }, 200);
+      }
+    }, 1550);
+  }
 }
+
 function wireEnvelope(){
-  const overlay=$("#envelope-overlay"), sealBtn=$("#openInvite"), envelope=$(".envelope");
-  if (sealBtn) sealBtn.addEventListener("click", openInvitation);
-  if (envelope) envelope.addEventListener("click",e=>{ if(e.target===sealBtn) return; openInvitation(); });
-  if (overlay){ overlay.tabIndex=0; overlay.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); openInvitation(); }}); }
+  const overlay = $("#envelope-overlay");
+  const sealBtn = $("#openInvite");
+  const envelope = $(".envelope");
+  
+  if (sealBtn) {
+    sealBtn.addEventListener("click", e => {
+      e.stopPropagation();
+      e.preventDefault();
+      console.log("🎯 Sello clickeado - transición suave");
+      openInvitation();
+    });
+    
+    // También permitir abrir con Enter/Espacio cuando el sello tiene focus
+    sealBtn.addEventListener("keydown", e => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        openInvitation();
+      }
+    });
+  }
+  
+  // Prevenir que clicks en el sobre (fuera del sello) abran la invitación
+  if (envelope) {
+    envelope.addEventListener("click", e => {
+      if (e.target === sealBtn) return;
+      e.stopPropagation();
+    });
+  }
+  
+  // Accesibilidad: permitir abrir con teclado desde el overlay
+  if (overlay){ 
+    overlay.tabIndex = 0; 
+    overlay.setAttribute("role", "button");
+    overlay.setAttribute("aria-label", "Abrir invitación de boda - Presiona Enter o Espacio");
+    
+    overlay.addEventListener("keydown", e => { 
+      if(e.key === "Enter" || e.key === " "){ 
+        e.preventDefault(); 
+        openInvitation(); 
+      }
+    }); 
+  }
 }
 
 // ================== HISTORIA (carga historia.txt) ==================
@@ -103,5 +188,13 @@ window.addEventListener("DOMContentLoaded", ()=>{
   enableRevealOnScroll();
   wireRSVPButton();
   wireEnvelope();
-  loadHistoria(); // ← lee historia.txt
+  loadHistoria();
+  
+  // Pre-carga las imágenes del sobre para máxima suavidad
+  console.log("🖼️ Pre-cargando imágenes...");
+  const preloadClosed = new Image();
+  preloadClosed.src = "images/envelope.jpg";
+  
+  const preloadOpen = new Image();
+  preloadOpen.src = "images/envelope-open.jpg";
 });
