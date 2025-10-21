@@ -166,7 +166,8 @@ body.scrolling .music-player-minimal .volume-vertical {
 }
 
 .volume-slider-vertical {
-  -webkit-appearance: slider-vertical;
+  appearance: slider-vertical;             /* ✅ estándar */
+  -webkit-appearance: slider-vertical;     /* ✅ compatibilidad WebKit */
   width: 6px;
   height: 100px;
   background: linear-gradient(to top, var(--soft-gray) 0%, var(--dusty-blue) 100%);
@@ -176,7 +177,10 @@ body.scrolling .music-player-minimal .volume-vertical {
   transition: all 0.3s ease;
   writing-mode: bt-lr;
 }
-.volume-slider-vertical:hover { width: 8px; }
+.volume-slider-vertical:hover {
+  width: 8px;
+}
+
 
 .volume-slider-vertical::-webkit-slider-thumb {
   -webkit-appearance: none;
