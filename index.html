@@ -24,6 +24,40 @@
 </head>
 <body>
 
+  <!-- 🎵 REPRODUCTOR DE MÚSICA MINIMALISTA -->
+  <div class="music-player-minimal">
+    <button id="musicToggle" class="music-btn-minimal" aria-label="Reproducir música">
+      <!-- Icono de Play -->
+      <svg class="music-icon music-icon--play" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+        <path d="M8 5v14l11-7z"/>
+      </svg>
+      <!-- Icono de Pause -->
+      <svg class="music-icon music-icon--pause" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+        <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+      </svg>
+    </button>
+    
+    <!-- Barra de volumen vertical -->
+    <div class="volume-vertical">
+      <input type="range" id="volumeSlider" class="volume-slider-vertical" min="0" max="100" value="30" orient="vertical" aria-label="Control de volumen">
+    </div>
+  </div>
+  
+  <!-- YouTube Player (oculto) -->
+  <div id="youtubePlayer" style="display:none;"></div>
+
+  <!-- 🔍 CONTROL DE TAMAÑO DE LETRA CON LUPA Y SLIDER -->
+  <div class="font-control-slider">
+    <div class="font-control-icon">
+      <svg class="magnifier-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="10" cy="10" r="7"/>
+        <path d="M21 21l-6-6"/>
+      </svg>
+    </div>
+    <input type="range" id="fontSlider" class="font-slider" min="80" max="200" value="100" step="5" aria-label="Ajustar tamaño de letra">
+    <span id="fontPercent" class="font-percent">100%</span>
+  </div>
+
   <!-- 💌 SOBRE -->
   <div id="envelope-overlay" class="envelope-overlay">
     <div class="envelope">
@@ -112,28 +146,20 @@
             <!-- ITINERARIO DEL DÍA -->
             <div class="itinerario">
               <h3 class="itinerario-title">Itinerario del Día</h3>
-              <ul class="itinerario-list">
+              <ol class="itinerario-list">
+                <li class="itinerario-item">Recepción</li>
+                <li class="itinerario-item">Acto civil</li>
                 <li class="itinerario-item">
-                  <strong>Recepción</strong>
-                  <p>Bienvenida con copa de honor</p>
+                  Bendición y votos:
+                  <ul class="itinerario-sublist">
+                    <li>Bendición de los padres</li>
+                    <li>Intercambio de promesas</li>
+                    <li>Mensaje pastoral</li>
+                  </ul>
                 </li>
-                <li class="itinerario-item">
-                  <strong>Acto Civil</strong>
-                  <p>Unión legal y brindis de felicitación</p>
-                </li>
-                <li class="itinerario-item">
-                  <strong>Bendición y Votos</strong>
-                  <p>Bendición familiar e intercambio de promesas<br>Mensaje pastoral</p>
-                </li>
-                <li class="itinerario-item">
-                  <strong>Cena de Celebración</strong>
-                  <p>Banquete y brindis de nuestros invitados</p>
-                </li>
-                <li class="itinerario-item">
-                  <strong>Corte del Pastel</strong>
-                  <p>Símbolo de nuestro dulce comienzo</p>
-                </li>
-              </ul>
+                <li class="itinerario-item">Cena</li>
+                <li class="itinerario-item">Tiempo abierto para las palabras de los invitados</li>
+              </ol>
             </div>
           </div>
           <footer class="card__footer">
@@ -172,6 +198,9 @@
   </section>
 
   <footer class="footer">Areli & Toño • 29 de Noviembre, 2025</footer>
+  
+  <!-- YouTube IFrame API -->
+  <script src="https://www.youtube.com/iframe_api"></script>
   <script src="script.js" defer></script>
 </body>
 </html>

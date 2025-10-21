@@ -2,6 +2,196 @@
 const FORM_URL_BASE = "https://forms.office.com/Pages/ResponsePage.aspx?id=DQSIkWdsW0yxEjajBLZtrQAAAAAAAAAAAAZ__oZGHM5UMVlCQUVCWUNFUEZORDNMVzRMMFJTV0NRVS4u";
 const FORM_PREFILL_KEYS = ["nombre", "pases", "mesa", "invitacion"];
 
+// ================== MÚSICA DE YOUTUBE ==================
+// ID CORRECTO del video (solo los caracteres después de v= y antes de &)
+const YOUTUBE_VIDEO_ID = "ft8Pqz9npF0"; // <- Ya está corregido
+const SONG_NAME = "Música para nuestra boda"; // <- Cambia esto por el nombre de tu canción
+
+let youtubePlayer = null;
+let isPlaying = false;
+let playerReady = false;
+
+// Esta función la llama automáticamente la API de YouTube cuando está lista
+window.onYouTubeIframeAPIReady = function() {
+  console.log('🎵 Inicializando reproductor de YouTube...');
+  youtubePlayer = new YT.Player('youtubePlayer', {
+    height: '0',
+    width: '0',
+    videoId: YOUTUBE_VIDEO_ID,
+    playerVars: {
+      'autoplay': 0,
+      'controls': 0,
+      'showinfo': 0,
+      'modestbranding': 1,
+      'loop': 1,
+      'playlist': YOUTUBE_VIDEO_ID,
+      'fs': 0,
+      'cc_load_policy': 0,
+      'iv_load_policy': 3,
+      'autohide': 1,
+      'rel': 0
+    },
+    events: {
+      'onReady': onPlayerReady,
+      'onStateChange': onPlayerStateChange,
+      'onError': onPlayerError
+    }
+  });
+};
+
+function onPlayerReady(event) {
+  console.log('✅ Reproductor de YouTube listo');
+  playerReady = true;
+  event.target.setVolume(30);
+  updateMusicStatus('Listo para reproducir');
+}
+
+function onPlayerStateChange(event) {
+  console.log('🔄 Estado del reproductor:', event.data);
+  
+  if (event.data === YT.PlayerState.PLAYING) {
+    console.log('▶️ Reproduciendo');
+    isPlaying = true;
+    updateMusicButton(true);
+    updateMusicStatus('Reproduciendo...');
+  } else if (event.data === YT.PlayerState.PAUSED) {
+    console.log('⏸️ Pausado');
+    isPlaying = false;
+    updateMusicButton(false);
+    updateMusicStatus('Pausado');
+  } else if (event.data === YT.PlayerState.ENDED) {
+    console.log('🔁 Video terminado, reiniciando...');
+    youtubePlayer.playVideo();
+  } else if (event.data === YT.PlayerState.BUFFERING) {
+    updateMusicStatus('Cargando...');
+  }
+}
+
+function onPlayerError(event) {
+  console.error('❌ Error en el reproductor:', event.data);
+  updateMusicStatus('Error al cargar');
+  playerReady = false;
+}
+
+function updateMusicButton(playing) {
+  const musicBtn = $('#musicToggle');
+  if (musicBtn) {
+    if (playing) {
+      musicBtn.classList.add('playing');
+      musicBtn.classList.add('active');
+      musicBtn.setAttribute('title', 'Pausar música');
+    } else {
+      musicBtn.classList.remove('playing');
+      musicBtn.classList.remove('active');
+      musicBtn.setAttribute('title', 'Reproducir música');
+    }
+  }
+}
+
+function updateMusicStatus(status) {
+  const statusEl = $('#musicStatus');
+  if (statusEl) {
+    statusEl.textContent = status;
+  }
+}
+
+function updateSongName() {
+  const titleEl = $('#musicTitle');
+  if (titleEl) {
+    titleEl.textContent = SONG_NAME;
+  }
+}
+
+function wireMusicPlayer() {
+  const musicBtn = $('#musicToggle');
+  const volumeSlider = $('#volumeSlider');
+  const volumePercent = $('#volumePercent');
+  
+  // Actualizar nombre de la canción
+  updateSongName();
+  
+  if (musicBtn) {
+    musicBtn.addEventListener('click', () => {
+      if (!playerReady || !youtubePlayer) {
+        console.log('⏳ Reproductor aún no está listo');
+        updateMusicStatus('Cargando reproductor...');
+        return;
+      }
+      
+      try {
+        if (isPlaying) {
+          youtubePlayer.pauseVideo();
+          console.log('⏸️ Pausando música');
+        } else {
+          youtubePlayer.playVideo();
+          console.log('▶️ Reproduciendo música');
+        }
+      } catch (error) {
+        console.error('❌ Error al controlar el reproductor:', error);
+        updateMusicStatus('Error al reproducir');
+      }
+    });
+  }
+  
+  if (volumeSlider) {
+    volumeSlider.addEventListener('input', (e) => {
+      const volume = parseInt(e.target.value);
+      if (youtubePlayer && playerReady && youtubePlayer.setVolume) {
+        try {
+          youtubePlayer.setVolume(volume);
+          console.log('🔊 Volumen: ' + volume + '%');
+        } catch (error) {
+          console.error('❌ Error al cambiar volumen:', error);
+        }
+      }
+      if (volumePercent) {
+        volumePercent.textContent = volume + '%';
+      }
+    });
+    
+    // Inicializar el display del volumen
+    if (volumePercent) {
+      volumePercent.textContent = volumeSlider.value + '%';
+    }
+  }
+}
+
+// ================== CONTROL DE TAMAÑO DE FUENTE CON SLIDER ==================
+let currentFontSize = 100;
+
+function setFontSize(percentage) {
+  currentFontSize = Math.max(80, Math.min(200, percentage));
+  document.documentElement.style.fontSize = currentFontSize + '%';
+  
+  const percentDisplay = $('#fontPercent');
+  if (percentDisplay) {
+    percentDisplay.textContent = currentFontSize + '%';
+  }
+  
+  const slider = $('#fontSlider');
+  if (slider && parseInt(slider.value) !== currentFontSize) {
+    slider.value = currentFontSize;
+  }
+  
+  console.log('🔍 Tamaño de fuente: ' + currentFontSize + '%');
+}
+
+function wireFontSlider() {
+  const slider = $('#fontSlider');
+  const percentDisplay = $('#fontPercent');
+  
+  if (slider) {
+    slider.addEventListener('input', (e) => {
+      const value = parseInt(e.target.value);
+      setFontSize(value);
+    });
+    
+    if (percentDisplay) {
+      percentDisplay.textContent = slider.value + '%';
+    }
+  }
+}
+
 // ================== HELPERS ==================
 const $  = (s, c=document) => c.querySelector(s);
 const $$ = (s, c=document) => Array.from(c.querySelectorAll(s));
@@ -67,43 +257,34 @@ function wireRSVPButton(){
 function openInvitation(){
   if (document.body.classList.contains("opened")) return;
   
-  console.log("🔓 Iniciando transición suave...");
+  console.log("📨 Iniciando transición suave...");
   
   const envelope = $(".envelope");
   const sealBtn = $("#openInvite");
   
   if (envelope) {
-    // Pre-asegurar que las imágenes estén cargadas
     const closedImg = $(".envelope__img--closed");
     const openImg = $(".envelope__img--open");
     
-    // Forzar el renderizado de ambas imágenes
     if (closedImg) closedImg.style.willChange = "opacity, transform, filter";
     if (openImg) openImg.style.willChange = "opacity, transform, filter";
     
-    // Iniciar animación de apertura
     envelope.classList.add("opening");
     
-    // Deshabilitar el botón inmediatamente
     if (sealBtn) {
       sealBtn.style.pointerEvents = "none";
     }
     
-    // Esperar a que termine la transición suave
     setTimeout(() => {
       console.log("🎉 Transición completada, mostrando invitación...");
       
-      // Agregar la clase que oculta el sobre
       document.body.classList.add("opened");
       
-      // Limpiar will-change después de la animación
       if (closedImg) closedImg.style.willChange = "auto";
       if (openImg) openImg.style.willChange = "auto";
       
-      // Hacer scroll al inicio suavemente
       window.scrollTo({ top: 0, behavior: "smooth" });
       
-      // Focus para accesibilidad
       const header = $("header"); 
       if(header){ 
         header.setAttribute("tabindex","-1"); 
@@ -129,7 +310,6 @@ function wireEnvelope(){
       openInvitation();
     });
     
-    // También permitir abrir con Enter/Espacio cuando el sello tiene focus
     sealBtn.addEventListener("keydown", e => {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
@@ -138,7 +318,6 @@ function wireEnvelope(){
     });
   }
   
-  // Prevenir que clicks en el sobre (fuera del sello) abran la invitación
   if (envelope) {
     envelope.addEventListener("click", e => {
       if (e.target === sealBtn) return;
@@ -146,7 +325,6 @@ function wireEnvelope(){
     });
   }
   
-  // Accesibilidad: permitir abrir con teclado desde el overlay
   if (overlay){ 
     overlay.tabIndex = 0; 
     overlay.setAttribute("role", "button");
@@ -174,7 +352,6 @@ async function loadHistoria(){
       el.innerHTML = `<p class="placeholder">El archivo <strong>historia.txt</strong> está vacío.</p>`;
       return;
     }
-    // Convierte saltos de línea en párrafos
     const parts = clean.split(/\n\s*\n/).map(p => p.replace(/\n/g," ").trim());
     el.innerHTML = parts.map(p => `<p>${p}</p>`).join("");
   }catch(err){
@@ -184,17 +361,21 @@ async function loadHistoria(){
 
 // ================== INIT ==================
 window.addEventListener("DOMContentLoaded", ()=>{
+  console.log('🚀 Inicializando página...');
+  wireFontSlider();
+  wireMusicPlayer();
   enableSmoothScroll();
   enableRevealOnScroll();
   wireRSVPButton();
   wireEnvelope();
   loadHistoria();
   
-  // Pre-carga las imágenes del sobre para máxima suavidad
   console.log("🖼️ Pre-cargando imágenes...");
   const preloadClosed = new Image();
   preloadClosed.src = "images/envelope.jpg";
   
   const preloadOpen = new Image();
   preloadOpen.src = "images/envelope-open.jpg";
+  
+  console.log('✅ Página lista');
 });
