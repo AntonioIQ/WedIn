@@ -3,15 +3,18 @@ const FORM_URL_BASE = "https://forms.office.com/Pages/ResponsePage.aspx?id=DQSIk
 const FORM_PREFILL_KEYS = ["nombre", "pases", "mesa", "invitacion"];
 
 // ================== MÚSICA DE YOUTUBE ==================
-// ID CORRECTO del video (solo los caracteres después de v= y antes de &)
-const YOUTUBE_VIDEO_ID = "ft8Pqz9npF0"; // <- Ya está corregido
-const SONG_NAME = "Música para nuestra boda"; // <- Cambia esto por el nombre de tu canción
+const YOUTUBE_VIDEO_ID = "a6lhnqQRDhg";
+const SONG_NAME = "Música para nuestra boda";
 
 let youtubePlayer = null;
 let isPlaying = false;
 let playerReady = false;
 
-// Esta función la llama automáticamente la API de YouTube cuando está lista
+// Helpers cortos
+const $  = (s, c=document) => c.querySelector(s);
+const $$ = (s, c=document) => Array.from(c.querySelectorAll(s));
+
+// API YouTube lista
 window.onYouTubeIframeAPIReady = function() {
   console.log('🎵 Inicializando reproductor de YouTube...');
   youtubePlayer = new YT.Player('youtubePlayer', {
@@ -44,24 +47,30 @@ function onPlayerReady(event) {
   playerReady = true;
   event.target.setVolume(30);
   updateMusicStatus('Listo para reproducir');
+  updateSongName();
 }
 
 function onPlayerStateChange(event) {
   console.log('🔄 Estado del reproductor:', event.data);
-  
+  const playerBox = document.querySelector('.music-player-minimal');
+
   if (event.data === YT.PlayerState.PLAYING) {
-    console.log('▶️ Reproduciendo');
     isPlaying = true;
+
+    // Cierra la barra de volumen para que el bloque pueda desaparecer en reposo
+    if (playerBox) playerBox.classList.remove('controls-open');
+
     updateMusicButton(true);
     updateMusicStatus('Reproduciendo...');
+
   } else if (event.data === YT.PlayerState.PAUSED) {
-    console.log('⏸️ Pausado');
     isPlaying = false;
     updateMusicButton(false);
     updateMusicStatus('Pausado');
+
   } else if (event.data === YT.PlayerState.ENDED) {
-    console.log('🔁 Video terminado, reiniciando...');
-    youtubePlayer.playVideo();
+    youtubePlayer.playVideo(); // loop
+
   } else if (event.data === YT.PlayerState.BUFFERING) {
     updateMusicStatus('Cargando...');
   }
@@ -90,26 +99,20 @@ function updateMusicButton(playing) {
 
 function updateMusicStatus(status) {
   const statusEl = $('#musicStatus');
-  if (statusEl) {
-    statusEl.textContent = status;
-  }
+  if (statusEl) statusEl.textContent = status;
 }
 
 function updateSongName() {
   const titleEl = $('#musicTitle');
-  if (titleEl) {
-    titleEl.textContent = SONG_NAME;
-  }
+  if (titleEl) titleEl.textContent = SONG_NAME;
 }
 
 function wireMusicPlayer() {
-  const musicBtn = $('#musicToggle');
+  const playerBox    = document.querySelector('.music-player-minimal');
+  const musicBtn     = $('#musicToggle');
   const volumeSlider = $('#volumeSlider');
-  const volumePercent = $('#volumePercent');
-  
-  // Actualizar nombre de la canción
-  updateSongName();
-  
+  const volumePercent = $('#volumePercent'); // opcional
+
   if (musicBtn) {
     musicBtn.addEventListener('click', () => {
       if (!playerReady || !youtubePlayer) {
@@ -117,15 +120,15 @@ function wireMusicPlayer() {
         updateMusicStatus('Cargando reproductor...');
         return;
       }
-      
       try {
+        // Alternar reproducción
         if (isPlaying) {
           youtubePlayer.pauseVideo();
-          console.log('⏸️ Pausando música');
         } else {
           youtubePlayer.playVideo();
-          console.log('▶️ Reproduciendo música');
         }
+        // Abrir/cerrar controles (muestra volumen opaco mientras estén abiertos)
+        if (playerBox) playerBox.classList.toggle('controls-open');
       } catch (error) {
         console.error('❌ Error al controlar el reproductor:', error);
         updateMusicStatus('Error al reproducir');
@@ -134,29 +137,20 @@ function wireMusicPlayer() {
   }
   
   if (volumeSlider) {
+    if (volumePercent) volumePercent.textContent = volumeSlider.value + '%';
+
     volumeSlider.addEventListener('input', (e) => {
       const volume = parseInt(e.target.value);
       if (youtubePlayer && playerReady && youtubePlayer.setVolume) {
-        try {
-          youtubePlayer.setVolume(volume);
-          console.log('🔊 Volumen: ' + volume + '%');
-        } catch (error) {
-          console.error('❌ Error al cambiar volumen:', error);
-        }
+        try { youtubePlayer.setVolume(volume); }
+        catch (error) { console.error('❌ Error al cambiar volumen:', error); }
       }
-      if (volumePercent) {
-        volumePercent.textContent = volume + '%';
-      }
+      if (volumePercent) volumePercent.textContent = volume + '%';
     });
-    
-    // Inicializar el display del volumen
-    if (volumePercent) {
-      volumePercent.textContent = volumeSlider.value + '%';
-    }
   }
 }
 
-// ================== CONTROL DE TAMAÑO DE FUENTE CON SLIDER ==================
+// ================== CONTROL DE TAMAÑO DE FUENTE ==================
 let currentFontSize = 100;
 
 function setFontSize(percentage) {
@@ -164,14 +158,10 @@ function setFontSize(percentage) {
   document.documentElement.style.fontSize = currentFontSize + '%';
   
   const percentDisplay = $('#fontPercent');
-  if (percentDisplay) {
-    percentDisplay.textContent = currentFontSize + '%';
-  }
+  if (percentDisplay) percentDisplay.textContent = currentFontSize + '%';
   
   const slider = $('#fontSlider');
-  if (slider && parseInt(slider.value) !== currentFontSize) {
-    slider.value = currentFontSize;
-  }
+  if (slider && parseInt(slider.value) !== currentFontSize) slider.value = currentFontSize;
   
   console.log('🔍 Tamaño de fuente: ' + currentFontSize + '%');
 }
@@ -179,23 +169,12 @@ function setFontSize(percentage) {
 function wireFontSlider() {
   const slider = $('#fontSlider');
   const percentDisplay = $('#fontPercent');
-  
-  if (slider) {
-    slider.addEventListener('input', (e) => {
-      const value = parseInt(e.target.value);
-      setFontSize(value);
-    });
-    
-    if (percentDisplay) {
-      percentDisplay.textContent = slider.value + '%';
-    }
-  }
+  if (!slider) return;
+  slider.addEventListener('input', (e) => setFontSize(parseInt(e.target.value)));
+  if (percentDisplay) percentDisplay.textContent = slider.value + '%';
 }
 
-// ================== HELPERS ==================
-const $  = (s, c=document) => c.querySelector(s);
-const $$ = (s, c=document) => Array.from(c.querySelectorAll(s));
-
+// ================== RSVP Y UTILIDADES ==================
 function getQueryParams(){
   const out={}, usp=new URLSearchParams(location.search);
   FORM_PREFILL_KEYS.forEach(k => { if (usp.has(k)) out[k]=usp.get(k); });
@@ -209,8 +188,6 @@ function mergeParams(baseUrl, paramsObj){
   });
   return url.toString();
 }
-
-// ================== RSVP ==================
 function buildFormURL(extra = {}) { return mergeParams(FORM_URL_BASE, { ...getQueryParams(), ...extra }); }
 function openRSVP(extraParams = {}){
   const url = buildFormURL(extraParams);
@@ -220,7 +197,7 @@ function openRSVP(extraParams = {}){
   if (!win) location.href = url;
 }
 
-// ================== UI ==================
+// Scroll suave y revelar al hacer scroll (decorativo)
 function enableSmoothScroll(){
   $$('a[href^="#"]').forEach(a=>{
     a.addEventListener("click", e=>{
@@ -253,93 +230,52 @@ function wireRSVPButton(){
   btn.addEventListener("click", e=>{ e.preventDefault(); openRSVP({}); });
 }
 
-// ================== SOBRE - ANIMACIÓN SUPER SUAVE ==================
+// ================== SOBRE - ANIMACIÓN ==================
 function openInvitation(){
   if (document.body.classList.contains("opened")) return;
-  
   console.log("📨 Iniciando transición suave...");
-  
   const envelope = $(".envelope");
   const sealBtn = $("#openInvite");
-  
   if (envelope) {
     const closedImg = $(".envelope__img--closed");
     const openImg = $(".envelope__img--open");
-    
     if (closedImg) closedImg.style.willChange = "opacity, transform, filter";
     if (openImg) openImg.style.willChange = "opacity, transform, filter";
-    
     envelope.classList.add("opening");
-    
-    if (sealBtn) {
-      sealBtn.style.pointerEvents = "none";
-    }
-    
+    if (sealBtn) sealBtn.style.pointerEvents = "none";
     setTimeout(() => {
       console.log("🎉 Transición completada, mostrando invitación...");
-      
       document.body.classList.add("opened");
-      
       if (closedImg) closedImg.style.willChange = "auto";
       if (openImg) openImg.style.willChange = "auto";
-      
       window.scrollTo({ top: 0, behavior: "smooth" });
-      
       const header = $("header"); 
       if(header){ 
         header.setAttribute("tabindex","-1"); 
-        setTimeout(() => {
-          header.focus();
-          header.removeAttribute("tabindex");
-        }, 200);
+        setTimeout(() => { header.focus(); header.removeAttribute("tabindex"); }, 200);
       }
     }, 1550);
   }
 }
-
 function wireEnvelope(){
   const overlay = $("#envelope-overlay");
   const sealBtn = $("#openInvite");
   const envelope = $(".envelope");
-  
   if (sealBtn) {
-    sealBtn.addEventListener("click", e => {
-      e.stopPropagation();
-      e.preventDefault();
-      console.log("🎯 Sello clickeado - transición suave");
-      openInvitation();
-    });
-    
-    sealBtn.addEventListener("keydown", e => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        openInvitation();
-      }
-    });
+    sealBtn.addEventListener("click", e => { e.stopPropagation(); e.preventDefault(); openInvitation(); });
+    sealBtn.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openInvitation(); } });
   }
-  
   if (envelope) {
-    envelope.addEventListener("click", e => {
-      if (e.target === sealBtn) return;
-      e.stopPropagation();
-    });
+    envelope.addEventListener("click", e => { if (e.target === sealBtn) return; e.stopPropagation(); });
   }
-  
   if (overlay){ 
-    overlay.tabIndex = 0; 
-    overlay.setAttribute("role", "button");
+    overlay.tabIndex = 0; overlay.setAttribute("role", "button");
     overlay.setAttribute("aria-label", "Abrir invitación de boda - Presiona Enter o Espacio");
-    
-    overlay.addEventListener("keydown", e => { 
-      if(e.key === "Enter" || e.key === " "){ 
-        e.preventDefault(); 
-        openInvitation(); 
-      }
-    }); 
+    overlay.addEventListener("keydown", e => { if(e.key === "Enter" || e.key === " "){ e.preventDefault(); openInvitation(); } });
   }
 }
 
-// ================== HISTORIA (carga historia.txt) ==================
+// ================== HISTORIA ==================
 async function loadHistoria(){
   const el=$("#historiaContent");
   if (!el) return;
@@ -359,23 +295,38 @@ async function loadHistoria(){
   }
 }
 
+// ================== CLASE body.scrolling ==================
+let _scrollTimer = null;
+function wireScrollClass(){
+  window.addEventListener('scroll', () => {
+    document.body.classList.add('scrolling');
+
+    // Si tienes indicador, ocultarlo al primer scroll
+    const si = document.querySelector('.scroll-indicator');
+    if (si) si.classList.add('hidden');
+
+    clearTimeout(_scrollTimer);
+    _scrollTimer = setTimeout(() => {
+      document.body.classList.remove('scrolling');
+    }, 800); // debe coincidir con tu intención de "tenue mientras se mueve"
+  }, { passive: true });
+}
+
 // ================== INIT ==================
 window.addEventListener("DOMContentLoaded", ()=>{
   console.log('🚀 Inicializando página...');
   wireFontSlider();
   wireMusicPlayer();
+  wireScrollClass();      // controla body.scrolling
   enableSmoothScroll();
   enableRevealOnScroll();
   wireRSVPButton();
   wireEnvelope();
   loadHistoria();
-  
-  console.log("🖼️ Pre-cargando imágenes...");
-  const preloadClosed = new Image();
-  preloadClosed.src = "images/envelope.jpg";
-  
-  const preloadOpen = new Image();
-  preloadOpen.src = "images/envelope-open.jpg";
-  
+
+  // Preload imágenes del sobre
+  const preloadClosed = new Image(); preloadClosed.src = "images/envelope.jpg";
+  const preloadOpen   = new Image(); preloadOpen.src   = "images/envelope-open.jpg";
+
   console.log('✅ Página lista');
 });
