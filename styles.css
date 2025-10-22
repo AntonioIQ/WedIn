@@ -212,30 +212,42 @@ body.scrolling .music-player-minimal .volume-vertical {
   box-shadow: 0 3px 12px rgba(125,157,181,.6);
 }
 
-/* Responsive - MÓVIL */
+/* Responsive - MÓVIL (mismo comportamiento que desktop, solo ajustes de tamaño) */
 @media (max-width: 640px) {
-  .music-player-minimal { bottom: 15px; left: 15px; }
-  .music-btn-minimal { width: 44px; height: 44px; }
-  
-  /* EN MÓVIL: Botón opaco (no tenue) durante scroll */
-  body.scrolling .music-btn-minimal { 
-    opacity: 1; 
-    filter: none;
+  .music-player-minimal { 
+    bottom: 15px; 
+    left: 15px;
+    /* Hotzone más grande para facilitar el toque */
+    padding: 12px;
   }
   
-  /* EN MÓVIL: Volumen visible cuando está activo */
-  body.scrolling .volume-vertical,
-  .music-player-minimal.controls-open .volume-vertical {
-    opacity: 1 !important;
-    transform: translateY(0) !important;
-    pointer-events: all !important;
+  /* Botón ligeramente más grande para dedos */
+  .music-btn-minimal { 
+    width: 50px; 
+    height: 50px; 
   }
   
-  /* Controles más grandes para dedos */
-  .volume-vertical { height: 80px; }
-  .volume-slider-vertical { height: 80px; width: 8px; }
-  .volume-slider-vertical::-webkit-slider-thumb { width: 20px; height: 20px; }
-  .volume-slider-vertical::-moz-range-thumb { width: 20px; height: 20px; }
+  /* Controles de volumen más grandes y fáciles de tocar */
+  .volume-vertical { height: 90px; }
+  .volume-slider-vertical { 
+    height: 90px; 
+    width: 10px; /* más ancho para dedos */
+  }
+  .volume-slider-vertical::-webkit-slider-thumb { 
+    width: 22px; 
+    height: 22px; 
+  }
+  .volume-slider-vertical::-moz-range-thumb { 
+    width: 22px; 
+    height: 22px; 
+  }
+  
+  /* MANTENER el mismo comportamiento de ocultación que desktop:
+     - El reproductor desaparece cuando no se interactúa
+     - Aparece con scroll (tenue)
+     - Se hace opaco al tocar
+     - La barra de volumen se oculta durante scroll
+  */
 }
 
 /* =========================================================================
