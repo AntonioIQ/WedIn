@@ -166,8 +166,8 @@ body.scrolling .music-player-minimal .volume-vertical {
 }
 
 .volume-slider-vertical {
-  appearance: slider-vertical;             /* ✅ estándar */
-  -webkit-appearance: slider-vertical;     /* ✅ compatibilidad WebKit */
+  appearance: slider-vertical;
+  -webkit-appearance: slider-vertical;
   width: 6px;
   height: 100px;
   background: linear-gradient(to top, var(--soft-gray) 0%, var(--dusty-blue) 100%);
@@ -176,12 +176,15 @@ body.scrolling .music-player-minimal .volume-vertical {
   cursor: pointer;
   transition: all 0.3s ease;
   writing-mode: bt-lr;
+  
+  /* Forzar estilos en móvil */
+  -webkit-tap-highlight-color: transparent;
 }
 .volume-slider-vertical:hover {
   width: 8px;
 }
 
-
+/* ===== SLIDER THUMB (botón del slider) ===== */
 .volume-slider-vertical::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
@@ -193,10 +196,12 @@ body.scrolling .music-player-minimal .volume-vertical {
   box-shadow: 0 2px 8px rgba(125,157,181,.4);
   transition: all 0.2s ease;
 }
-.volume-slider-vertical::-webkit-slider-thumb:hover {
+.volume-slider-vertical::-webkit-slider-thumb:hover,
+.volume-slider-vertical::-webkit-slider-thumb:active {
   transform: scale(1.2);
   box-shadow: 0 3px 12px rgba(125,157,181,.6);
 }
+
 .volume-slider-vertical::-moz-range-thumb {
   width: 16px;
   height: 16px;
@@ -207,47 +212,76 @@ body.scrolling .music-player-minimal .volume-vertical {
   box-shadow: 0 2px 8px rgba(125,157,181,.4);
   transition: all 0.2s ease;
 }
-.volume-slider-vertical::-moz-range-thumb:hover {
+.volume-slider-vertical::-moz-range-thumb:hover,
+.volume-slider-vertical::-moz-range-thumb:active {
   transform: scale(1.2);
   box-shadow: 0 3px 12px rgba(125,157,181,.6);
 }
 
-/* Responsive - MÓVIL (mismo comportamiento que desktop, solo ajustes de tamaño) */
+/* Forzar track (barra) del slider - especialmente para móvil */
+.volume-slider-vertical::-webkit-slider-runnable-track {
+  background: transparent;
+  border: none;
+}
+.volume-slider-vertical::-moz-range-track {
+  background: transparent;
+  border: none;
+}
+
+/* Responsive - MÓVIL */
 @media (max-width: 640px) {
+  /* ===== TAMAÑOS ADAPTADOS PARA DEDOS ===== */
   .music-player-minimal { 
     bottom: 15px; 
     left: 15px;
-    /* Hotzone más grande para facilitar el toque */
     padding: 12px;
   }
   
-  /* Botón ligeramente más grande para dedos */
   .music-btn-minimal { 
     width: 50px; 
     height: 50px; 
   }
   
-  /* Controles de volumen más grandes y fáciles de tocar */
-  .volume-vertical { height: 90px; }
+  .volume-vertical { 
+    height: 90px; 
+  }
+  
   .volume-slider-vertical { 
     height: 90px; 
-    width: 10px; /* más ancho para dedos */
+    width: 10px;
   }
+  
   .volume-slider-vertical::-webkit-slider-thumb { 
     width: 22px; 
     height: 22px; 
   }
+  
   .volume-slider-vertical::-moz-range-thumb { 
     width: 22px; 
     height: 22px; 
   }
   
-  /* MANTENER el mismo comportamiento de ocultación que desktop:
-     - El reproductor desaparece cuando no se interactúa
-     - Aparece con scroll (tenue)
-     - Se hace opaco al tocar
-     - La barra de volumen se oculta durante scroll
-  */
+  /* ===== COMPORTAMIENTO TÁCTIL ===== */
+  /* En móvil: simular hover con active/focus para ocultación */
+  .music-player-minimal:active,
+  .music-player-minimal:focus-within {
+    opacity: 1;
+  }
+  
+  /* Asegurar que los controles se vean al tocar */
+  .music-player-minimal:active .volume-vertical,
+  .music-player-minimal:focus-within .volume-vertical {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: all;
+  }
+  
+  /* Cuando está reproduciendo, mantener visible solo el botón */
+  .music-player-minimal.playing:not(.controls-open) .volume-vertical {
+    opacity: 0;
+    transform: translateY(10px);
+    pointer-events: none;
+  }
 }
 
 /* =========================================================================

@@ -165,6 +165,11 @@ function wireMusicPlayer() {
   musicBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     
+    // En móvil, el touchstart ya maneja el toggle, solo manejar play/pause
+    if (isTouchDevice) {
+      e.preventDefault();
+    }
+    
     if (!playerReady || !youtubePlayer) {
       console.log('⏳ Reproductor aún no está listo');
       updateMusicStatus('Cargando reproductor...');
@@ -180,7 +185,6 @@ function wireMusicPlayer() {
       }
       
       // En desktop, toggle de controles
-      // En móvil, los controles se manejan automáticamente
       if (!isTouchDevice && playerBox) {
         playerBox.classList.toggle('controls-open');
       }
@@ -246,17 +250,63 @@ function wireMusicPlayer() {
 
   // ===== MANEJO TÁCTIL EN MÓVIL =====
   if (isTouchDevice && playerBox) {
-    // En móvil, un toque fuera del reproductor cierra los controles
-    document.addEventListener('touchstart', (e) => {
-      if (!playerBox.contains(e.target) && !isPlaying) {
-        playerBox.classList.remove('controls-open');
+    let touchTimer = null;
+    
+    // Al tocar el reproductor
+    playerBox.addEventListener('touchstart', (e) => {
+      e.stopPropagation();
+      
+      // Si tocó el botón de música
+      if (e.target.closest('.music-btn-minimal')) {
+        // Controlar reproducción
+        if (playerReady && youtubePlayer) {
+          try {
+            if (isPlaying) {
+              youtubePlayer.pauseVideo();
+            } else {
+              youtubePlayer.playVideo();
+            }
+          } catch (error) {
+            console.error('❌ Error al controlar reproducción:', error);
+          }
+        }
+        
+        // Toggle controles
+        if (playerBox.classList.contains('controls-open')) {
+          playerBox.classList.remove('controls-open');
+        } else {
+          playerBox.classList.add('controls-open');
+          
+          // Auto-cerrar después de 4 segundos
+          clearTimeout(touchTimer);
+          touchTimer = setTimeout(() => {
+            playerBox.classList.remove('controls-open');
+          }, 4000);
+        }
       }
     });
     
-    // Prevenir que toques en el reproductor lo cierren
-    playerBox.addEventListener('touchstart', (e) => {
-      e.stopPropagation();
+    // Toque fuera del reproductor cierra los controles
+    document.addEventListener('touchstart', (e) => {
+      if (!playerBox.contains(e.target)) {
+        playerBox.classList.remove('controls-open');
+        clearTimeout(touchTimer);
+      }
     });
+    
+    // Mientras se usa el slider, mantener controles abiertos
+    if (volumeSlider) {
+      volumeSlider.addEventListener('touchstart', () => {
+        clearTimeout(touchTimer);
+      });
+      
+      volumeSlider.addEventListener('touchend', () => {
+        // Cerrar después de ajustar volumen
+        touchTimer = setTimeout(() => {
+          playerBox.classList.remove('controls-open');
+        }, 3000);
+      });
+    }
   }
   
   console.log('🎵 Reproductor de música configurado');
@@ -423,35 +473,22 @@ function openInvitation() {
       }
       
       // ========== 🎵 REPRODUCIR MÚSICA AUTOMÁTICAMENTE ==========
-      // Después de abrir el sobre, iniciar la música
+      // Después de abrir el sobre, iniciar la música (sin notificación)
       setTimeout(() => {
         if (youtubePlayer && playerReady) {
           try {
-            // Intentar reproducir
-            const playPromise = youtubePlayer.playVideo();
-            
-            // En móviles, si el navegador bloquea autoplay, mostrar notificación
-            if (playPromise !== undefined) {
-              playPromise.then(() => {
-                console.log('🎵 Reproduciendo música automáticamente');
-              }).catch(error => {
-                console.log('⚠️ Autoplay bloqueado por el navegador');
-                showMusicPrompt();
-              });
-            } else {
-              // Fallback: esperar un momento y verificar si está reproduciendo
-              setTimeout(() => {
-                if (!isPlaying) {
-                  console.log('⚠️ Autoplay no funcionó');
-                  showMusicPrompt();
-                } else {
-                  console.log('🎵 Reproduciendo música automáticamente');
-                }
-              }, 1000);
-            }
+            youtubePlayer.playVideo();
+            console.log('🎵 Reproduciendo música automáticamente');
           } catch (error) {
             console.error('❌ Error al reproducir música:', error);
-            showMusicPrompt();
+            // Intentar de nuevo después de un momento
+            setTimeout(() => {
+              try {
+                youtubePlayer.playVideo();
+              } catch (e) {
+                console.log('⚠️ No se pudo reproducir automáticamente');
+              }
+            }, 1000);
           }
         } else {
           console.log('⏳ Reproductor aún no está listo para autoplay');
@@ -568,108 +605,6 @@ function wireScrollClass() {
   }, { passive: true });
   
   console.log('📜 Detección de scroll configurada');
-}
-
-
-/* ============================================================================
-   NOTIFICACIÓN DE MÚSICA (para móviles que bloquean autoplay)
-   ========================================================================== */
-
-function showMusicPrompt() {
-  // Evitar mostrar múltiples notificaciones
-  if (document.querySelector('.music-prompt')) return;
-  
-  // Crear notificación
-  const prompt = document.createElement('div');
-  prompt.className = 'music-prompt';
-  prompt.innerHTML = `
-    <div class="music-prompt-content">
-      <svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor">
-        <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
-      </svg>
-      <p>¿Reproducir música?</p>
-      <button class="music-prompt-btn">Sí, reproducir</button>
-    </div>
-  `;
-  
-  // Estilos inline para la notificación
-  prompt.style.cssText = `
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 99999;
-    background: white;
-    padding: 2rem;
-    border-radius: 16px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-    text-align: center;
-    animation: fadeInScale 0.3s ease;
-  `;
-  
-  const content = prompt.querySelector('.music-prompt-content');
-  content.style.cssText = `
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-  `;
-  
-  const svg = prompt.querySelector('svg');
-  svg.style.cssText = `
-    color: var(--dusty-blue, #7d9db5);
-  `;
-  
-  const p = prompt.querySelector('p');
-  p.style.cssText = `
-    margin: 0;
-    font-size: 1.1rem;
-    color: var(--ink-1, #2c3e50);
-    font-weight: 600;
-  `;
-  
-  const btn = prompt.querySelector('.music-prompt-btn');
-  btn.style.cssText = `
-    background: var(--dusty-blue, #7d9db5);
-    color: white;
-    border: none;
-    padding: 0.75rem 2rem;
-    border-radius: 8px;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-  `;
-  
-  // Agregar animación
-  const style = document.createElement('style');
-  style.textContent = `
-    @keyframes fadeInScale {
-      from {
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(0.9);
-      }
-      to {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1);
-      }
-    }
-  `;
-  document.head.appendChild(style);
-  
-  // Evento del botón
-  btn.addEventListener('click', () => {
-    if (youtubePlayer && playerReady) {
-      youtubePlayer.playVideo();
-    }
-    prompt.style.animation = 'fadeInScale 0.3s ease reverse';
-    setTimeout(() => prompt.remove(), 300);
-  });
-  
-  // Agregar a la página
-  document.body.appendChild(prompt);
-  
-  console.log('🔔 Notificación de música mostrada');
 }
 
 
