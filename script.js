@@ -1,22 +1,52 @@
-// ================== CONFIG ==================
+/* ============================================================================
+   INVITACIÓN DE BODA - CHRISTIAN ARELI & JOSÉ ANTONIO
+   Script principal con soporte completo para móvil
+   ========================================================================== */
+
+// ==================== CONFIGURACIÓN ====================
 const FORM_URL_BASE = "https://forms.office.com/Pages/ResponsePage.aspx?id=DQSIkWdsW0yxEjajBLZtrQAAAAAAAAAAAAZ__oZGHM5UMVlCQUVCWUNFUEZORDNMVzRMMFJTV0NRVS4u";
 const FORM_PREFILL_KEYS = ["nombre", "pases", "mesa", "invitacion"];
 
-// ================== MÚSICA DE YOUTUBE ==================
-const YOUTUBE_VIDEO_ID = "a6lhnqQRDhg";
+// Configuración de YouTube
+const YOUTUBE_VIDEO_ID = "w11tnVnoYM8";
 const SONG_NAME = "Música para nuestra boda";
 
+// ==================== VARIABLES GLOBALES ====================
 let youtubePlayer = null;
 let isPlaying = false;
 let playerReady = false;
+let isTouchDevice = false;
 
-// Helpers cortos
-const $  = (s, c=document) => c.querySelector(s);
-const $$ = (s, c=document) => Array.from(c.querySelectorAll(s));
+// ==================== HELPERS ====================
+// Selección rápida de elementos
+const $ = (s, c = document) => c.querySelector(s);
+const $$ = (s, c = document) => Array.from(c.querySelectorAll(s));
 
-// API YouTube lista
+// Detectar dispositivo táctil
+function detectTouchDevice() {
+  isTouchDevice = (
+    'ontouchstart' in window ||
+    navigator.maxTouchPoints > 0 ||
+    navigator.msMaxTouchPoints > 0
+  );
+  
+  if (isTouchDevice) {
+    document.body.classList.add('touch-device');
+    console.log('📱 Dispositivo táctil detectado');
+  } else {
+    console.log('🖱️ Dispositivo con mouse detectado');
+  }
+}
+
+
+/* ============================================================================
+   REPRODUCTOR DE MÚSICA YOUTUBE
+   ========================================================================== */
+
+// ===== INICIALIZACIÓN DEL REPRODUCTOR =====
 window.onYouTubeIframeAPIReady = function() {
   console.log('🎵 Inicializando reproductor de YouTube...');
+  
   youtubePlayer = new YT.Player('youtubePlayer', {
     height: '0',
     width: '0',
@@ -42,6 +72,8 @@ window.onYouTubeIframeAPIReady = function() {
   });
 };
 
+// ===== EVENTOS DEL REPRODUCTOR =====
+
 function onPlayerReady(event) {
   console.log('✅ Reproductor de YouTube listo');
   playerReady = true;
@@ -56,12 +88,20 @@ function onPlayerStateChange(event) {
 
   if (event.data === YT.PlayerState.PLAYING) {
     isPlaying = true;
-
-    // Cierra la barra de volumen para que el bloque pueda desaparecer en reposo
-    if (playerBox) playerBox.classList.remove('controls-open');
-
     updateMusicButton(true);
     updateMusicStatus('Reproduciendo...');
+    
+    // En móvil, mantener controles visibles mientras reproduce
+    if (isTouchDevice && playerBox) {
+      playerBox.classList.add('controls-open');
+    } else if (playerBox) {
+      // En desktop, cerrar la barra después de un momento
+      setTimeout(() => {
+        if (isPlaying && !playerBox.matches(':hover')) {
+          playerBox.classList.remove('controls-open');
+        }
+      }, 2000);
+    }
 
   } else if (event.data === YT.PlayerState.PAUSED) {
     isPlaying = false;
@@ -82,6 +122,8 @@ function onPlayerError(event) {
   playerReady = false;
 }
 
+// ===== ACTUALIZACIÓN DE UI =====
+
 function updateMusicButton(playing) {
   const musicBtn = $('#musicToggle');
   if (musicBtn) {
@@ -89,10 +131,12 @@ function updateMusicButton(playing) {
       musicBtn.classList.add('playing');
       musicBtn.classList.add('active');
       musicBtn.setAttribute('title', 'Pausar música');
+      musicBtn.setAttribute('aria-label', 'Pausar música');
     } else {
       musicBtn.classList.remove('playing');
       musicBtn.classList.remove('active');
       musicBtn.setAttribute('title', 'Reproducir música');
+      musicBtn.setAttribute('aria-label', 'Reproducir música');
     }
   }
 }
@@ -107,226 +151,463 @@ function updateSongName() {
   if (titleEl) titleEl.textContent = SONG_NAME;
 }
 
-function wireMusicPlayer() {
-  const playerBox    = document.querySelector('.music-player-minimal');
-  const musicBtn     = $('#musicToggle');
-  const volumeSlider = $('#volumeSlider');
-  const volumePercent = $('#volumePercent'); // opcional
+// ===== CONFIGURACIÓN DE CONTROLES =====
 
-  if (musicBtn) {
-    musicBtn.addEventListener('click', () => {
-      if (!playerReady || !youtubePlayer) {
-        console.log('⏳ Reproductor aún no está listo');
-        updateMusicStatus('Cargando reproductor...');
-        return;
+function wireMusicPlayer() {
+  const playerBox = document.querySelector('.music-player-minimal');
+  const musicBtn = $('#musicToggle');
+  const volumeSlider = $('#volumeSlider');
+  const volumePercent = $('#volumePercent');
+
+  if (!musicBtn) return;
+
+  // ===== BOTÓN DE PLAY/PAUSE =====
+  musicBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    
+    if (!playerReady || !youtubePlayer) {
+      console.log('⏳ Reproductor aún no está listo');
+      updateMusicStatus('Cargando reproductor...');
+      return;
+    }
+    
+    try {
+      // Alternar reproducción
+      if (isPlaying) {
+        youtubePlayer.pauseVideo();
+      } else {
+        youtubePlayer.playVideo();
       }
-      try {
-        // Alternar reproducción
-        if (isPlaying) {
-          youtubePlayer.pauseVideo();
-        } else {
-          youtubePlayer.playVideo();
+      
+      // En desktop, toggle de controles
+      // En móvil, los controles se manejan automáticamente
+      if (!isTouchDevice && playerBox) {
+        playerBox.classList.toggle('controls-open');
+      }
+      
+    } catch (error) {
+      console.error('❌ Error al controlar el reproductor:', error);
+      updateMusicStatus('Error al reproducir');
+    }
+  });
+
+  // ===== CONTROL DE VOLUMEN =====
+  if (volumeSlider) {
+    // Inicializar display de porcentaje
+    if (volumePercent) {
+      volumePercent.textContent = volumeSlider.value + '%';
+    }
+
+    // Evento de cambio de volumen
+    volumeSlider.addEventListener('input', (e) => {
+      const volume = parseInt(e.target.value);
+      
+      if (youtubePlayer && playerReady && youtubePlayer.setVolume) {
+        try {
+          youtubePlayer.setVolume(volume);
+        } catch (error) {
+          console.error('❌ Error al cambiar volumen:', error);
         }
-        // Abrir/cerrar controles (muestra volumen opaco mientras estén abiertos)
-        if (playerBox) playerBox.classList.toggle('controls-open');
-      } catch (error) {
-        console.error('❌ Error al controlar el reproductor:', error);
-        updateMusicStatus('Error al reproducir');
       }
+      
+      if (volumePercent) {
+        volumePercent.textContent = volume + '%';
+      }
+    });
+    
+    // En móvil, asegurar que el slider sea fácil de usar
+    if (isTouchDevice) {
+      volumeSlider.addEventListener('touchstart', (e) => {
+        e.stopPropagation();
+      });
+      
+      volumeSlider.addEventListener('touchmove', (e) => {
+        e.stopPropagation();
+      });
+    }
+  }
+
+  // ===== MANEJO DE HOVER EN DESKTOP =====
+  if (!isTouchDevice && playerBox) {
+    // Mantener controles abiertos mientras hay hover
+    playerBox.addEventListener('mouseenter', () => {
+      if (playerReady) {
+        playerBox.classList.add('controls-open');
+      }
+    });
+
+    // Cerrar controles al salir del hover (solo si no está reproduciendo)
+    playerBox.addEventListener('mouseleave', () => {
+      if (!isPlaying) {
+        playerBox.classList.remove('controls-open');
+      }
+    });
+  }
+
+  // ===== MANEJO TÁCTIL EN MÓVIL =====
+  if (isTouchDevice && playerBox) {
+    // En móvil, un toque fuera del reproductor cierra los controles
+    document.addEventListener('touchstart', (e) => {
+      if (!playerBox.contains(e.target) && !isPlaying) {
+        playerBox.classList.remove('controls-open');
+      }
+    });
+    
+    // Prevenir que toques en el reproductor lo cierren
+    playerBox.addEventListener('touchstart', (e) => {
+      e.stopPropagation();
     });
   }
   
-  if (volumeSlider) {
-    if (volumePercent) volumePercent.textContent = volumeSlider.value + '%';
-
-    volumeSlider.addEventListener('input', (e) => {
-      const volume = parseInt(e.target.value);
-      if (youtubePlayer && playerReady && youtubePlayer.setVolume) {
-        try { youtubePlayer.setVolume(volume); }
-        catch (error) { console.error('❌ Error al cambiar volumen:', error); }
-      }
-      if (volumePercent) volumePercent.textContent = volume + '%';
-    });
-  }
+  console.log('🎵 Reproductor de música configurado');
 }
 
-// ================== CONTROL DE TAMAÑO DE FUENTE ==================
+
+/* ============================================================================
+   CONTROL DE TAMAÑO DE FUENTE
+   ========================================================================== */
+
 let currentFontSize = 100;
 
 function setFontSize(percentage) {
   currentFontSize = Math.max(80, Math.min(200, percentage));
   document.documentElement.style.fontSize = currentFontSize + '%';
   
-  const percentDisplay = $('#fontPercent');
-  if (percentDisplay) percentDisplay.textContent = currentFontSize + '%';
+  const fontPercentEl = $('#fontPercent');
+  if (fontPercentEl) fontPercentEl.textContent = currentFontSize + '%';
   
-  const slider = $('#fontSlider');
-  if (slider && parseInt(slider.value) !== currentFontSize) slider.value = currentFontSize;
-  
-  console.log('🔍 Tamaño de fuente: ' + currentFontSize + '%');
+  console.log('🔤 Tamaño de fuente:', currentFontSize + '%');
 }
 
 function wireFontSlider() {
-  const slider = $('#fontSlider');
-  const percentDisplay = $('#fontPercent');
-  if (!slider) return;
-  slider.addEventListener('input', (e) => setFontSize(parseInt(e.target.value)));
-  if (percentDisplay) percentDisplay.textContent = slider.value + '%';
-}
-
-// ================== RSVP Y UTILIDADES ==================
-function getQueryParams(){
-  const out={}, usp=new URLSearchParams(location.search);
-  FORM_PREFILL_KEYS.forEach(k => { if (usp.has(k)) out[k]=usp.get(k); });
-  return out;
-}
-function mergeParams(baseUrl, paramsObj){
-  if (!paramsObj || !Object.keys(paramsObj).length) return baseUrl;
-  const url = new URL(baseUrl);
-  Object.entries(paramsObj).forEach(([k,v]) => {
-    if (v != null && String(v).trim() !== "") url.searchParams.set(k, v);
+  const fontSlider = $('#fontSlider');
+  if (!fontSlider) return;
+  
+  // Evento de cambio
+  fontSlider.addEventListener('input', e => {
+    setFontSize(parseInt(e.target.value));
   });
-  return url.toString();
-}
-function buildFormURL(extra = {}) { return mergeParams(FORM_URL_BASE, { ...getQueryParams(), ...extra }); }
-function openRSVP(extraParams = {}){
-  const url = buildFormURL(extraParams);
-  const win = window.open(url, "_blank", "noopener");
-  const fallback = $("#rsvpFallback");
-  if (fallback) fallback.setAttribute("href", url);
-  if (!win) location.href = url;
+  
+  // Inicializar
+  setFontSize(100);
+  
+  console.log('🔤 Control de tamaño de fuente configurado');
 }
 
-// Scroll suave y revelar al hacer scroll (decorativo)
-function enableSmoothScroll(){
-  $$('a[href^="#"]').forEach(a=>{
-    a.addEventListener("click", e=>{
-      const href=a.getAttribute("href");
-      if (!href || href==="#") return;
-      const target=$(href); if (!target) return;
+
+/* ============================================================================
+   RSVP - CONFIRMACIÓN DE ASISTENCIA
+   ========================================================================== */
+
+function buildRSVPUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const pairs = FORM_PREFILL_KEYS.map(k => {
+    const v = params.get(k);
+    return v ? `${k}=${encodeURIComponent(v)}` : null;
+  }).filter(Boolean);
+  
+  let url = FORM_URL_BASE;
+  if (pairs.length) url += '&' + pairs.join('&');
+  
+  return url;
+}
+
+function wireRSVPButton() {
+  const btn = $('#rsvpBtn');
+  if (!btn) return;
+  
+  btn.addEventListener('click', e => {
+    e.preventDefault();
+    const url = buildRSVPUrl();
+    console.log('📝 Abriendo formulario RSVP:', url);
+    window.open(url, '_blank');
+  });
+  
+  console.log('📝 Botón RSVP configurado');
+}
+
+
+/* ============================================================================
+   SCROLL SUAVE Y ANIMACIONES
+   ========================================================================== */
+
+// ===== SCROLL SUAVE A ANCLAS =====
+function enableSmoothScroll() {
+  $$('a[href^="#"]').forEach(a => {
+    a.addEventListener("click", e => {
+      const href = a.getAttribute("href");
+      if (!href || href === "#") return;
+      
+      const target = $(href);
+      if (!target) return;
+      
       e.preventDefault();
-      target.scrollIntoView({behavior:"smooth"});
+      target.scrollIntoView({ behavior: "smooth" });
     });
   });
+  
+  console.log('📜 Scroll suave habilitado');
 }
-function enableRevealOnScroll(){
-  const obs=new IntersectionObserver((entries,o)=>{
-    entries.forEach(en=>{
-      if (en.isIntersecting){
-        en.target.style.opacity="1";
-        en.target.style.transform="translateY(0)";
+
+// ===== REVELAR ELEMENTOS AL HACER SCROLL =====
+function enableRevealOnScroll() {
+  const obs = new IntersectionObserver((entries, o) => {
+    entries.forEach(en => {
+      if (en.isIntersecting) {
+        en.target.style.opacity = "1";
+        en.target.style.transform = "translateY(0)";
         o.unobserve(en.target);
       }
     });
-  },{threshold:.1, rootMargin:"0px 0px -5% 0px"});
-  $$(".section, .card, .calendar").forEach(el=>{
-    el.style.opacity="0";
-    el.style.transform="translateY(20px)";
+  }, {
+    threshold: .1,
+    rootMargin: "0px 0px -5% 0px"
+  });
+  
+  $$(".section, .card, .calendar").forEach(el => {
+    el.style.opacity = "0";
+    el.style.transform = "translateY(20px)";
+    el.style.transition = "opacity 0.6s ease, transform 0.6s ease";
     obs.observe(el);
   });
-}
-function wireRSVPButton(){
-  const btn=$("#rsvpBtn"); if(!btn) return;
-  btn.addEventListener("click", e=>{ e.preventDefault(); openRSVP({}); });
+  
+  console.log('✨ Animaciones de revelado configuradas');
 }
 
-// ================== SOBRE - ANIMACIÓN ==================
-function openInvitation(){
+
+/* ============================================================================
+   SOBRE - ANIMACIÓN DE APERTURA
+   ========================================================================== */
+
+function openInvitation() {
   if (document.body.classList.contains("opened")) return;
+  
   console.log("📨 Iniciando transición suave...");
+  
   const envelope = $(".envelope");
   const sealBtn = $("#openInvite");
+  
   if (envelope) {
     const closedImg = $(".envelope__img--closed");
     const openImg = $(".envelope__img--open");
+    
+    // Optimización de rendimiento
     if (closedImg) closedImg.style.willChange = "opacity, transform, filter";
     if (openImg) openImg.style.willChange = "opacity, transform, filter";
+    
+    // Iniciar animación
     envelope.classList.add("opening");
     if (sealBtn) sealBtn.style.pointerEvents = "none";
+    
+    // Completar transición
     setTimeout(() => {
       console.log("🎉 Transición completada, mostrando invitación...");
+      
       document.body.classList.add("opened");
+      
+      // Limpiar optimizaciones
       if (closedImg) closedImg.style.willChange = "auto";
       if (openImg) openImg.style.willChange = "auto";
+      
+      // Scroll suave al inicio
       window.scrollTo({ top: 0, behavior: "smooth" });
-      const header = $("header"); 
-      if(header){ 
-        header.setAttribute("tabindex","-1"); 
-        setTimeout(() => { header.focus(); header.removeAttribute("tabindex"); }, 200);
+      
+      // Enfocar el header para accesibilidad
+      const header = $("header");
+      if (header) {
+        header.setAttribute("tabindex", "-1");
+        setTimeout(() => {
+          header.focus();
+          header.removeAttribute("tabindex");
+        }, 200);
       }
+      
+      // ========== 🎵 REPRODUCIR MÚSICA AUTOMÁTICAMENTE ==========
+      // Después de abrir el sobre, iniciar la música
+      setTimeout(() => {
+        if (youtubePlayer && playerReady) {
+          try {
+            youtubePlayer.playVideo();
+            console.log('🎵 Reproduciendo música automáticamente');
+          } catch (error) {
+            console.error('❌ Error al reproducir música:', error);
+          }
+        } else {
+          console.log('⏳ Reproductor aún no está listo para autoplay');
+        }
+      }, 500);
+      // ========================================================
+      
     }, 1550);
   }
 }
-function wireEnvelope(){
+
+function wireEnvelope() {
   const overlay = $("#envelope-overlay");
   const sealBtn = $("#openInvite");
   const envelope = $(".envelope");
+  
+  // ===== BOTÓN DEL SELLO =====
   if (sealBtn) {
-    sealBtn.addEventListener("click", e => { e.stopPropagation(); e.preventDefault(); openInvitation(); });
-    sealBtn.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openInvitation(); } });
+    sealBtn.addEventListener("click", e => {
+      e.stopPropagation();
+      e.preventDefault();
+      openInvitation();
+    });
+    
+    sealBtn.addEventListener("keydown", e => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        openInvitation();
+      }
+    });
   }
+  
+  // ===== SOBRE (prevenir propagación) =====
   if (envelope) {
-    envelope.addEventListener("click", e => { if (e.target === sealBtn) return; e.stopPropagation(); });
+    envelope.addEventListener("click", e => {
+      if (e.target === sealBtn) return;
+      e.stopPropagation();
+    });
   }
-  if (overlay){ 
-    overlay.tabIndex = 0; overlay.setAttribute("role", "button");
+  
+  // ===== OVERLAY (accesibilidad) =====
+  if (overlay) {
+    overlay.tabIndex = 0;
+    overlay.setAttribute("role", "button");
     overlay.setAttribute("aria-label", "Abrir invitación de boda - Presiona Enter o Espacio");
-    overlay.addEventListener("keydown", e => { if(e.key === "Enter" || e.key === " "){ e.preventDefault(); openInvitation(); } });
+    
+    overlay.addEventListener("keydown", e => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        openInvitation();
+      }
+    });
   }
+  
+  console.log('💌 Sobre de invitación configurado');
 }
 
-// ================== HISTORIA ==================
-async function loadHistoria(){
-  const el=$("#historiaContent");
+
+/* ============================================================================
+   HISTORIA (CARGA DESDE ARCHIVO)
+   ========================================================================== */
+
+async function loadHistoria() {
+  const el = $("#historiaContent");
   if (!el) return;
-  try{
+  
+  try {
     const res = await fetch("historia.txt", { cache: "no-store" });
+    
     if (!res.ok) throw new Error("No encontrado");
+    
     const txt = await res.text();
     const clean = txt.trim();
-    if (!clean){
+    
+    if (!clean) {
       el.innerHTML = `<p class="placeholder">El archivo <strong>historia.txt</strong> está vacío.</p>`;
       return;
     }
-    const parts = clean.split(/\n\s*\n/).map(p => p.replace(/\n/g," ").trim());
+    
+    // Convertir párrafos separados por líneas en blanco
+    const parts = clean.split(/\n\s*\n/).map(p => p.replace(/\n/g, " ").trim());
     el.innerHTML = parts.map(p => `<p>${p}</p>`).join("");
-  }catch(err){
+    
+    console.log('📖 Historia cargada exitosamente');
+    
+  } catch (err) {
     el.innerHTML = `<p class="placeholder">Carga "<strong>historia.txt</strong>" en la raíz del sitio para mostrar su contenido aquí.</p>`;
+    console.log('📖 Archivo historia.txt no encontrado (opcional)');
   }
 }
 
-// ================== CLASE body.scrolling ==================
+
+/* ============================================================================
+   CLASE body.scrolling
+   ========================================================================== */
+
 let _scrollTimer = null;
-function wireScrollClass(){
+
+function wireScrollClass() {
   window.addEventListener('scroll', () => {
+    // Agregar clase mientras se hace scroll
     document.body.classList.add('scrolling');
 
-    // Si tienes indicador, ocultarlo al primer scroll
+    // Ocultar indicador de scroll
     const si = document.querySelector('.scroll-indicator');
     if (si) si.classList.add('hidden');
 
+    // Quitar clase después de que termine el scroll
     clearTimeout(_scrollTimer);
     _scrollTimer = setTimeout(() => {
       document.body.classList.remove('scrolling');
-    }, 800); // debe coincidir con tu intención de "tenue mientras se mueve"
+    }, 800);
+    
   }, { passive: true });
+  
+  console.log('📜 Detección de scroll configurada');
 }
 
-// ================== INIT ==================
-window.addEventListener("DOMContentLoaded", ()=>{
-  console.log('🚀 Inicializando página...');
+
+/* ============================================================================
+   PRELOAD DE IMÁGENES
+   ========================================================================== */
+
+function preloadImages() {
+  // Precargar imágenes del sobre para transición suave
+  const preloadClosed = new Image();
+  preloadClosed.src = "images/envelope.jpg";
+  
+  const preloadOpen = new Image();
+  preloadOpen.src = "images/envelope-open.jpg";
+  
+  console.log('🖼️ Precarga de imágenes iniciada');
+}
+
+
+/* ============================================================================
+   INICIALIZACIÓN PRINCIPAL
+   ========================================================================== */
+
+window.addEventListener("DOMContentLoaded", () => {
+  console.log('🚀 Inicializando página de boda...');
+  console.log('💑 Christian Areli & José Antonio');
+  console.log('📅 29 de Noviembre, 2025');
+  console.log('─────────────────────────────────');
+  
+  // Detectar tipo de dispositivo
+  detectTouchDevice();
+  
+  // Inicializar todos los módulos
   wireFontSlider();
   wireMusicPlayer();
-  wireScrollClass();      // controla body.scrolling
+  wireScrollClass();
   enableSmoothScroll();
   enableRevealOnScroll();
   wireRSVPButton();
   wireEnvelope();
   loadHistoria();
-
-  // Preload imágenes del sobre
-  const preloadClosed = new Image(); preloadClosed.src = "images/envelope.jpg";
-  const preloadOpen   = new Image(); preloadOpen.src   = "images/envelope-open.jpg";
-
-  console.log('✅ Página lista');
+  preloadImages();
+  
+  console.log('─────────────────────────────────');
+  console.log('✅ Página lista para usar');
 });
+
+
+/* ============================================================================
+   DEBUG Y UTILIDADES
+   ========================================================================== */
+
+// Exponer funciones útiles para debug (solo en desarrollo)
+if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+  window.weddingDebug = {
+    openInvitation,
+    setFontSize,
+    player: () => youtubePlayer,
+    isTouchDevice: () => isTouchDevice,
+    isPlaying: () => isPlaying,
+    playerReady: () => playerReady
+  };
+  console.log('🔧 Modo debug activado. Usa window.weddingDebug para funciones de prueba.');
+}

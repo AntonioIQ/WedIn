@@ -216,9 +216,26 @@ body.scrolling .music-player-minimal .volume-vertical {
 @media (max-width: 640px) {
   .music-player-minimal { bottom: 15px; left: 15px; }
   .music-btn-minimal { width: 44px; height: 44px; }
-  body.scrolling .music-btn-minimal { opacity: 0.45; }
+  
+  /* EN MÓVIL: Botón opaco (no tenue) durante scroll */
+  body.scrolling .music-btn-minimal { 
+    opacity: 1; 
+    filter: none;
+  }
+  
+  /* EN MÓVIL: Volumen visible cuando está activo */
+  body.scrolling .volume-vertical,
+  .music-player-minimal.controls-open .volume-vertical {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+    pointer-events: all !important;
+  }
+  
+  /* Controles más grandes para dedos */
   .volume-vertical { height: 80px; }
-  .volume-slider-vertical { height: 80px; }
+  .volume-slider-vertical { height: 80px; width: 8px; }
+  .volume-slider-vertical::-webkit-slider-thumb { width: 20px; height: 20px; }
+  .volume-slider-vertical::-moz-range-thumb { width: 20px; height: 20px; }
 }
 
 /* =========================================================================
