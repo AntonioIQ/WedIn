@@ -166,66 +166,91 @@ body.scrolling .music-player-minimal .volume-vertical {
 }
 
 .volume-slider-vertical {
-  appearance: slider-vertical;
-  -webkit-appearance: slider-vertical;
+  /* Resetear apariencia completamente para iOS */
+  -webkit-appearance: none;
+  appearance: none;
+  
   width: 6px;
   height: 100px;
-  background: linear-gradient(to top, var(--soft-gray) 0%, var(--dusty-blue) 100%);
+  
+  /* Colores específicos (no variables CSS que iOS puede ignorar) */
+  background: linear-gradient(to top, #b8c5d0 0%, #7d9db5 100%);
   border-radius: 10px;
   outline: none;
   cursor: pointer;
   transition: all 0.3s ease;
-  writing-mode: bt-lr;
   
-  /* Forzar estilos en móvil */
+  /* Para orientación vertical */
+  writing-mode: bt-lr;
+  -webkit-writing-mode: bt-lr;
+  
+  /* Eliminar estilos por defecto de iOS/Safari */
   -webkit-tap-highlight-color: transparent;
+  border: none;
+  margin: 0;
+  padding: 0;
 }
-.volume-slider-vertical:hover {
+
+.volume-slider-vertical:hover,
+.volume-slider-vertical:active {
   width: 8px;
 }
 
-/* ===== SLIDER THUMB (botón del slider) ===== */
+/* ===== SLIDER THUMB - WebKit (Safari/iOS) ===== */
 .volume-slider-vertical::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--dusty-blue) 0%, var(--slate-blue) 100%);
+  
+  /* Colores específicos sin variables CSS */
+  background: linear-gradient(135deg, #7d9db5 0%, #5b6e7c 100%);
+  
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(125,157,181,.4);
   transition: all 0.2s ease;
+  border: none;
 }
+
 .volume-slider-vertical::-webkit-slider-thumb:hover,
 .volume-slider-vertical::-webkit-slider-thumb:active {
   transform: scale(1.2);
   box-shadow: 0 3px 12px rgba(125,157,181,.6);
+  background: linear-gradient(135deg, #92adc2 0%, #6b7e8c 100%);
 }
 
+/* ===== SLIDER THUMB - Firefox ===== */
 .volume-slider-vertical::-moz-range-thumb {
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--dusty-blue) 0%, var(--slate-blue) 100%);
+  background: linear-gradient(135deg, #7d9db5 0%, #5b6e7c 100%);
   cursor: pointer;
   border: none;
   box-shadow: 0 2px 8px rgba(125,157,181,.4);
   transition: all 0.2s ease;
 }
+
 .volume-slider-vertical::-moz-range-thumb:hover,
 .volume-slider-vertical::-moz-range-thumb:active {
   transform: scale(1.2);
   box-shadow: 0 3px 12px rgba(125,157,181,.6);
 }
 
-/* Forzar track (barra) del slider - especialmente para móvil */
+/* ===== TRACK (barra) - forzar transparent en iOS ===== */
 .volume-slider-vertical::-webkit-slider-runnable-track {
+  -webkit-appearance: none;
+  appearance: none;
   background: transparent;
   border: none;
+  height: 100px;
 }
+
 .volume-slider-vertical::-moz-range-track {
   background: transparent;
   border: none;
+  height: 100px;
 }
 
 /* Responsive - MÓVIL */
@@ -262,25 +287,33 @@ body.scrolling .music-player-minimal .volume-vertical {
   }
   
   /* ===== COMPORTAMIENTO TÁCTIL ===== */
-  /* En móvil: simular hover con active/focus para ocultación */
+  /* Forzar visibilidad en iOS cuando se toca */
   .music-player-minimal:active,
   .music-player-minimal:focus-within {
-    opacity: 1;
+    opacity: 1 !important;
   }
   
-  /* Asegurar que los controles se vean al tocar */
+  /* Mostrar controles al tocar */
   .music-player-minimal:active .volume-vertical,
   .music-player-minimal:focus-within .volume-vertical {
-    opacity: 1;
-    transform: translateY(0);
-    pointer-events: all;
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+    pointer-events: all !important;
   }
   
-  /* Cuando está reproduciendo, mantener visible solo el botón */
+  /* Cuando está reproduciendo pero no abiertos los controles, ocultar barra */
   .music-player-minimal.playing:not(.controls-open) .volume-vertical {
-    opacity: 0;
-    transform: translateY(10px);
-    pointer-events: none;
+    opacity: 0 !important;
+    transform: translateY(10px) !important;
+    pointer-events: none !important;
+  }
+  
+  /* Forzar ocultación cuando no hay interacción (específico iOS) */
+  .music-player-minimal:not(.controls-open):not(:active):not(:focus-within) .volume-vertical {
+    opacity: 0 !important;
+    transform: translateY(10px) !important;
+    pointer-events: none !important;
+    transition: opacity 0.3s ease, transform 0.3s ease;
   }
 }
 

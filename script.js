@@ -91,9 +91,14 @@ function onPlayerStateChange(event) {
     updateMusicButton(true);
     updateMusicStatus('Reproduciendo...');
     
-    // En móvil, mantener controles visibles mientras reproduce
+    // En móvil, cerrar controles automáticamente después de 2s cuando empieza a reproducir
     if (isTouchDevice && playerBox) {
-      playerBox.classList.add('controls-open');
+      setTimeout(() => {
+        if (isPlaying) {
+          playerBox.classList.remove('controls-open');
+          console.log('🔇 Cerrando controles automáticamente');
+        }
+      }, 2000);
     } else if (playerBox) {
       // En desktop, cerrar la barra después de un momento
       setTimeout(() => {
@@ -473,23 +478,42 @@ function openInvitation() {
       }
       
       // ========== 🎵 REPRODUCIR MÚSICA AUTOMÁTICAMENTE ==========
-      // Después de abrir el sobre, iniciar la música (sin notificación)
+      // Después de abrir el sobre, iniciar la música
+      // iOS Safari requiere intentos múltiples y tiempo extra
       setTimeout(() => {
         if (youtubePlayer && playerReady) {
+          // Intento 1: inmediato
           try {
             youtubePlayer.playVideo();
-            console.log('🎵 Reproduciendo música automáticamente');
+            console.log('🎵 Intento 1: Reproduciendo música');
           } catch (error) {
-            console.error('❌ Error al reproducir música:', error);
-            // Intentar de nuevo después de un momento
-            setTimeout(() => {
+            console.log('⚠️ Intento 1 falló');
+          }
+          
+          // Intento 2: después de 800ms (para iOS)
+          setTimeout(() => {
+            if (!isPlaying && youtubePlayer) {
               try {
                 youtubePlayer.playVideo();
-              } catch (e) {
-                console.log('⚠️ No se pudo reproducir automáticamente');
+                console.log('🎵 Intento 2: Reproduciendo música');
+              } catch (error) {
+                console.log('⚠️ Intento 2 falló');
               }
-            }, 1000);
-          }
+            }
+          }, 800);
+          
+          // Intento 3: después de 1500ms (último intento para iOS)
+          setTimeout(() => {
+            if (!isPlaying && youtubePlayer) {
+              try {
+                youtubePlayer.playVideo();
+                console.log('🎵 Intento 3: Reproduciendo música');
+              } catch (error) {
+                console.log('⚠️ Autoplay bloqueado - usuario debe tocar botón');
+              }
+            }
+          }, 1500);
+          
         } else {
           console.log('⏳ Reproductor aún no está listo para autoplay');
         }
