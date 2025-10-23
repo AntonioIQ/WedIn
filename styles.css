@@ -203,8 +203,8 @@ body.scrolling .music-player-minimal.controls-open .volume-vertical {
   width: 6px;
   height: 100px;
   
-  /* Colores específicos (no variables CSS que iOS puede ignorar) */
-  background: linear-gradient(to top, #b8c5d0 0%, #7d9db5 100%);
+  /* Color sólido simple que siempre funciona */
+  background: #e0e0e0;
   border-radius: 10px;
   outline: none;
   cursor: pointer;
