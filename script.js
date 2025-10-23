@@ -170,9 +170,10 @@ function wireMusicPlayer() {
   musicBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     
-    // En móvil, el touchstart ya maneja el toggle, solo manejar play/pause
+    // Solo en móvil, prevenir que se ejecute también el touchend
     if (isTouchDevice) {
-      e.preventDefault();
+      // NO ejecutar aquí, el touchend lo manejará
+      return;
     }
     
     if (!playerReady || !youtubePlayer) {
@@ -185,12 +186,14 @@ function wireMusicPlayer() {
       // Alternar reproducción
       if (isPlaying) {
         youtubePlayer.pauseVideo();
+        console.log('⏸️ Música pausada (click)');
       } else {
         youtubePlayer.playVideo();
+        console.log('▶️ Música reproduciendo (click)');
       }
       
       // En desktop, toggle de controles
-      if (!isTouchDevice && playerBox) {
+      if (playerBox) {
         playerBox.classList.toggle('controls-open');
       }
       
@@ -202,25 +205,56 @@ function wireMusicPlayer() {
 
   // ===== CONTROL DE VOLUMEN =====
   if (volumeSlider) {
-    // Inicializar display de porcentaje
-    if (volumePercent) {
-      volumePercent.textContent = volumeSlider.value + '%';
+    // Función para actualizar el slider visualmente
+    function updateVolumeSlider(value) {
+      const percentage = value;
+      // Crear gradiente para slider horizontal (que rotaremos)
+      // De izquierda (0%) a derecha (100%), pero visualmente será de abajo hacia arriba
+      const gradient = `linear-gradient(to right, #7d9db5 0%, #7d9db5 ${percentage}%, #e0e0e0 ${percentage}%, #e0e0e0 100%)`;
+      volumeSlider.style.background = gradient;
+      
+      if (volumePercent) {
+        volumePercent.textContent = value + '%';
+      }
+      
+      console.log(`🔊 Volumen ajustado a: ${value}%`);
     }
+    
+    // Inicializar display de porcentaje y visual
+    updateVolumeSlider(parseInt(volumeSlider.value));
 
     // Evento de cambio de volumen
     volumeSlider.addEventListener('input', (e) => {
       const volume = parseInt(e.target.value);
       
+      // Actualizar visual del slider
+      updateVolumeSlider(volume);
+      
+      // Actualizar volumen del player
       if (youtubePlayer && playerReady && youtubePlayer.setVolume) {
         try {
           youtubePlayer.setVolume(volume);
+          console.log(`🔊 Volumen del player: ${volume}%`);
         } catch (error) {
           console.error('❌ Error al cambiar volumen:', error);
         }
+      } else {
+        console.log('⚠️ Player no listo para cambiar volumen');
       }
+    });
+    
+    // También escuchar el evento 'change' para cuando se suelta
+    volumeSlider.addEventListener('change', (e) => {
+      const volume = parseInt(e.target.value);
+      console.log(`✅ Volumen final confirmado: ${volume}%`);
       
-      if (volumePercent) {
-        volumePercent.textContent = volume + '%';
+      // Asegurar que el player tiene el volumen correcto
+      if (youtubePlayer && playerReady) {
+        try {
+          youtubePlayer.setVolume(volume);
+        } catch (error) {
+          console.error('❌ Error al confirmar volumen:', error);
+        }
       }
     });
     
@@ -228,10 +262,20 @@ function wireMusicPlayer() {
     if (isTouchDevice) {
       volumeSlider.addEventListener('touchstart', (e) => {
         e.stopPropagation();
+        console.log('👆 Iniciando ajuste de volumen - valor actual:', volumeSlider.value);
       });
       
       volumeSlider.addEventListener('touchmove', (e) => {
         e.stopPropagation();
+        // Log mientras se mueve
+        const currentVolume = parseInt(volumeSlider.value);
+        console.log(`📊 Moviendo slider: ${currentVolume}%`);
+      });
+      
+      volumeSlider.addEventListener('touchend', (e) => {
+        e.stopPropagation();
+        const finalVolume = parseInt(volumeSlider.value);
+        console.log(`✋ Soltado en: ${finalVolume}%`);
       });
     }
   }
@@ -297,22 +341,16 @@ function wireMusicPlayer() {
         updateMusicStatus('Cargando...');
       }
       
-      // Toggle controles
-      if (playerBox.classList.contains('controls-open')) {
+      // Mostrar controles (no toggle, siempre abrir)
+      playerBox.classList.add('controls-open');
+      console.log('🔊 Controles abiertos');
+      
+      // Auto-cerrar después de 5 segundos
+      clearTimeout(touchTimer);
+      touchTimer = setTimeout(() => {
         playerBox.classList.remove('controls-open');
-        clearTimeout(touchTimer);
-        console.log('🔇 Controles cerrados');
-      } else {
-        playerBox.classList.add('controls-open');
-        console.log('🔊 Controles abiertos');
-        
-        // Auto-cerrar después de 5 segundos
-        clearTimeout(touchTimer);
-        touchTimer = setTimeout(() => {
-          playerBox.classList.remove('controls-open');
-          console.log('🔇 Controles cerrados automáticamente');
-        }, 5000);
-      }
+        console.log('🔇 Controles cerrados automáticamente');
+      }, 5000);
     }, { passive: false });
     
     // Toque fuera del reproductor cierra los controles
