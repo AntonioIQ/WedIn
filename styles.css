@@ -102,6 +102,22 @@ body.scrolling .music-btn-minimal {
   box-shadow: 0 4px 20px rgba(93,110,124,.2);
   transition: all 0.3s ease;
   position: relative;
+  /* Mejorar respuesta táctil */
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+/* Botón más grande en dispositivos táctiles */
+.touch-device .music-btn-minimal {
+  width: 56px;
+  height: 56px;
+}
+
+/* En móvil, mantener el botón siempre visible cuando controls-open */
+.touch-device .music-player-minimal.controls-open .music-btn-minimal {
+  opacity: 1 !important;
+  filter: none !important;
 }
 
 .music-player-minimal:hover .music-btn-minimal {
@@ -165,6 +181,20 @@ body.scrolling .music-player-minimal .volume-vertical {
   transition: opacity 0.25s ease, transform 0.25s ease;
 }
 
+/* IMPORTANTE: En móvil, el volumen SOLO se muestra cuando controls-open está activo Y NO hay scroll */
+.touch-device .music-player-minimal.controls-open:not(.scrolling) .volume-vertical {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+  pointer-events: all !important;
+}
+
+/* Durante scroll, incluso con controls-open, ocultar el volumen */
+body.scrolling .music-player-minimal.controls-open .volume-vertical {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translateY(10px);
+}
+
 .volume-slider-vertical {
   /* Resetear apariencia completamente para iOS */
   -webkit-appearance: none;
@@ -213,6 +243,12 @@ body.scrolling .music-player-minimal .volume-vertical {
   border: none;
 }
 
+/* Thumb más grande en dispositivos táctiles */
+.touch-device .volume-slider-vertical::-webkit-slider-thumb {
+  width: 20px;
+  height: 20px;
+}
+
 .volume-slider-vertical::-webkit-slider-thumb:hover,
 .volume-slider-vertical::-webkit-slider-thumb:active {
   transform: scale(1.2);
@@ -230,6 +266,12 @@ body.scrolling .music-player-minimal .volume-vertical {
   border: none;
   box-shadow: 0 2px 8px rgba(125,157,181,.4);
   transition: all 0.2s ease;
+}
+
+/* Thumb más grande en dispositivos táctiles */
+.touch-device .volume-slider-vertical::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
 }
 
 .volume-slider-vertical::-moz-range-thumb:hover,
@@ -713,4 +755,65 @@ body.opened .date-container{ animation: dateReveal 1s cubic-bezier(0.25, 0.46, 0
 @media (max-width: 640px) and (min-height: 800px) {
   .band--header { padding: clamp(35px, 8vw, 55px) 0 clamp(25px, 5vw, 35px); }
   .nuestra-foto { padding: 1.25rem 0; }
+}
+
+/* ===== MEJORAS ADICIONALES PARA MÓVIL ===== */
+@media (max-width: 640px) {
+  /* Reproductor más accesible en móvil */
+  .music-player-minimal {
+    bottom: 15px;
+    left: 15px;
+    padding: 10px;
+  }
+  
+  /* Volumen más alto en móvil */
+  .volume-vertical {
+    height: 110px;
+  }
+  
+  .volume-slider-vertical {
+    height: 110px;
+  }
+  
+  /* Asegurar que en móvil siempre se pueda interactuar */
+  .touch-device .music-player-minimal {
+    opacity: 0.3;
+  }
+  
+  .touch-device .music-player-minimal.controls-open,
+  .touch-device .music-player-minimal:active {
+    opacity: 1;
+  }
+}
+
+/* Ajustes para pantallas muy pequeñas */
+@media (max-width: 375px) {
+  .music-player-minimal {
+    bottom: 10px;
+    left: 10px;
+  }
+  
+  .touch-device .music-btn-minimal {
+    width: 52px;
+    height: 52px;
+  }
+}
+
+/* ===== COMPORTAMIENTO EN MÓVIL DURANTE SCROLL ===== */
+/* En móvil, durante scroll, ocultar completamente el reproductor */
+.touch-device.scrolling .music-player-minimal {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Solo reaparece cuando dejas de hacer scroll */
+.touch-device:not(.scrolling) .music-player-minimal {
+  opacity: 0.3;
+  pointer-events: auto;
+}
+
+/* Y se vuelve completamente visible solo cuando abres los controles */
+.touch-device .music-player-minimal.controls-open {
+  opacity: 1 !important;
+  pointer-events: auto !important;
 }

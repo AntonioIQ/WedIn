@@ -256,40 +256,64 @@ function wireMusicPlayer() {
   // ===== MANEJO TÁCTIL EN MÓVIL =====
   if (isTouchDevice && playerBox) {
     let touchTimer = null;
+    let lastTap = 0;
     
-    // Al tocar el reproductor
-    playerBox.addEventListener('touchstart', (e) => {
+    // Prevenir propagación en touchstart
+    musicBtn.addEventListener('touchstart', (e) => {
       e.stopPropagation();
+      e.preventDefault();
+    }, { passive: false });
+    
+    // Manejar el toque en touchend para mejor respuesta
+    musicBtn.addEventListener('touchend', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
       
-      // Si tocó el botón de música
-      if (e.target.closest('.music-btn-minimal')) {
-        // Controlar reproducción
-        if (playerReady && youtubePlayer) {
-          try {
-            if (isPlaying) {
-              youtubePlayer.pauseVideo();
-            } else {
-              youtubePlayer.playVideo();
-            }
-          } catch (error) {
-            console.error('❌ Error al controlar reproducción:', error);
-          }
-        }
-        
-        // Toggle controles
-        if (playerBox.classList.contains('controls-open')) {
-          playerBox.classList.remove('controls-open');
-        } else {
-          playerBox.classList.add('controls-open');
-          
-          // Auto-cerrar después de 4 segundos
-          clearTimeout(touchTimer);
-          touchTimer = setTimeout(() => {
-            playerBox.classList.remove('controls-open');
-          }, 4000);
-        }
+      const currentTime = new Date().getTime();
+      const tapLength = currentTime - lastTap;
+      
+      // Evitar doble tap accidental (menos de 300ms)
+      if (tapLength < 300 && tapLength > 0) {
+        console.log('⚠️ Doble tap detectado, ignorando');
+        return;
       }
-    });
+      lastTap = currentTime;
+      
+      // Controlar reproducción
+      if (playerReady && youtubePlayer) {
+        try {
+          if (isPlaying) {
+            youtubePlayer.pauseVideo();
+            console.log('⏸️ Música pausada (touch)');
+          } else {
+            youtubePlayer.playVideo();
+            console.log('▶️ Música reproduciendo (touch)');
+          }
+        } catch (error) {
+          console.error('❌ Error al controlar reproducción:', error);
+        }
+      } else {
+        console.log('⏳ Player no está listo');
+        updateMusicStatus('Cargando...');
+      }
+      
+      // Toggle controles
+      if (playerBox.classList.contains('controls-open')) {
+        playerBox.classList.remove('controls-open');
+        clearTimeout(touchTimer);
+        console.log('🔇 Controles cerrados');
+      } else {
+        playerBox.classList.add('controls-open');
+        console.log('🔊 Controles abiertos');
+        
+        // Auto-cerrar después de 5 segundos
+        clearTimeout(touchTimer);
+        touchTimer = setTimeout(() => {
+          playerBox.classList.remove('controls-open');
+          console.log('🔇 Controles cerrados automáticamente');
+        }, 5000);
+      }
+    }, { passive: false });
     
     // Toque fuera del reproductor cierra los controles
     document.addEventListener('touchstart', (e) => {
@@ -301,14 +325,24 @@ function wireMusicPlayer() {
     
     // Mientras se usa el slider, mantener controles abiertos
     if (volumeSlider) {
-      volumeSlider.addEventListener('touchstart', () => {
+      volumeSlider.addEventListener('touchstart', (e) => {
+        e.stopPropagation();
         clearTimeout(touchTimer);
+        playerBox.classList.add('controls-open');
+        console.log('🎚️ Ajustando volumen...');
       });
       
-      volumeSlider.addEventListener('touchend', () => {
-        // Cerrar después de ajustar volumen
+      volumeSlider.addEventListener('touchmove', (e) => {
+        e.stopPropagation();
+      });
+      
+      volumeSlider.addEventListener('touchend', (e) => {
+        e.stopPropagation();
+        // Dar tiempo para ajustar, luego cerrar
+        clearTimeout(touchTimer);
         touchTimer = setTimeout(() => {
           playerBox.classList.remove('controls-open');
+          console.log('🔇 Cerrando controles después de ajustar volumen');
         }, 3000);
       });
     }
@@ -619,6 +653,15 @@ function wireScrollClass() {
     // Ocultar indicador de scroll
     const si = document.querySelector('.scroll-indicator');
     if (si) si.classList.add('hidden');
+    
+    // En móvil, cerrar los controles del reproductor cuando hay scroll
+    if (isTouchDevice) {
+      const playerBox = document.querySelector('.music-player-minimal');
+      if (playerBox && playerBox.classList.contains('controls-open')) {
+        playerBox.classList.remove('controls-open');
+        console.log('🔇 Controles cerrados por scroll');
+      }
+    }
 
     // Quitar clase después de que termine el scroll
     clearTimeout(_scrollTimer);

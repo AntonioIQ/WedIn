@@ -24,29 +24,41 @@
 </head>
 <body>
 
-  <!-- ==================== REPRODUCTOR DE MÚSICA MINIMALISTA ==================== -->
-  <!-- Reproductor flotante con controles de play/pause y volumen -->
-  <div class="music-player-minimal">
-    <button id="musicToggle" class="music-btn-minimal" aria-label="Reproducir música">
-      <!-- Icono de Play -->
-      <svg class="music-icon music-icon--play" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-        <path d="M8 5v14l11-7z"/>
-      </svg>
-      <!-- Icono de Pause -->
-      <svg class="music-icon music-icon--pause" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-        <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
-      </svg>
-    </button>
-   
-    <!-- Barra de volumen vertical -->
-    <div class="volume-vertical">
-      <input type="range" id="volumeSlider" class="volume-slider-vertical" min="0" max="100" value="30" orient="vertical" aria-label="Control de volumen">
-      <span id="volumePercent" class="volume-percent"></span>
-    </div>
+<!-- ==================== REPRODUCTOR DE MÚSICA MINIMALISTA ==================== -->
+<!-- Reproductor flotante con controles de play/pause y volumen -->
+<div class="music-player-minimal">
+  <button id="musicToggle" class="music-btn-minimal" aria-label="Reproducir música" type="button">
+    <!-- Icono de Play -->
+    <svg class="music-icon music-icon--play" viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+      <path d="M8 5v14l11-7z"/>
+    </svg>
+    <!-- Icono de Pause -->
+    <svg class="music-icon music-icon--pause" viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+      <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+    </svg>
+  </button>
+ 
+  <!-- Barra de volumen vertical -->
+  <div class="volume-vertical">
+    <input 
+      type="range" 
+      id="volumeSlider" 
+      class="volume-slider-vertical" 
+      min="0" 
+      max="100" 
+      value="30" 
+      step="1"
+      aria-label="Control de volumen"
+      aria-valuemin="0"
+      aria-valuemax="100"
+      aria-valuenow="30"
+    >
+    <span id="volumePercent" class="volume-percent" aria-live="polite"></span>
   </div>
-  
-  <!-- YouTube Player (oculto) -->
-  <div id="youtubePlayer" style="display:none;"></div>
+</div>
+
+<!-- YouTube Player (oculto) -->
+<div id="youtubePlayer" style="display:none;" aria-hidden="true"></div>
 
   <!-- ==================== CONTROL DE TAMAÑO DE LETRA ==================== -->
   <!-- Control con lupa y slider para ajustar el tamaño del texto -->
