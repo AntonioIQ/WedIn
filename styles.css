@@ -142,14 +142,17 @@ body.scrolling .music-btn-minimal {
 */
 .volume-vertical {
   position: relative;
-  height: 100px;
+  width: 20px;  /* Ancho estrecho para que el slider rotado quepa verticalmente */
+  height: 120px; /* Alto suficiente para el slider + porcentaje */
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   opacity: 0;
   transform: translateY(10px);
   pointer-events: none;
   transition: all 0.3s ease;
+  gap: 8px;
 }
 
 /* Mostrar por clic (togglear .controls-open) */
@@ -196,34 +199,38 @@ body.scrolling .music-player-minimal.controls-open .volume-vertical {
 }
 
 .volume-slider-vertical {
-  /* Resetear apariencia completamente para iOS */
+  /* Resetear apariencia completamente */
   -webkit-appearance: none;
   appearance: none;
   
-  width: 6px;
-  height: 100px;
+  /* Slider HORIZONTAL que rotaremos con transform */
+  width: 100px;
+  height: 6px;
   
-  /* Color sólido simple que siempre funciona */
+  /* Color sólido simple */
   background: #e0e0e0;
   border-radius: 10px;
   outline: none;
   cursor: pointer;
   transition: all 0.3s ease;
   
-  /* Para orientación vertical */
-  writing-mode: bt-lr;
-  -webkit-writing-mode: bt-lr;
+  /* Rotar para hacerlo vertical - centrado perfectamente */
+  transform: rotate(-90deg);
+  transform-origin: center center;
   
-  /* Eliminar estilos por defecto de iOS/Safari */
+  /* Asegurar que esté centrado en su contenedor */
+  position: relative;
+  margin: 0;
+  
+  /* Eliminar estilos por defecto */
   -webkit-tap-highlight-color: transparent;
   border: none;
-  margin: 0;
   padding: 0;
 }
 
 .volume-slider-vertical:hover,
 .volume-slider-vertical:active {
-  width: 8px;
+  height: 8px;
 }
 
 /* ===== SLIDER THUMB - WebKit (Safari/iOS) ===== */
