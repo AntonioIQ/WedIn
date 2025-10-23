@@ -142,17 +142,31 @@ body.scrolling .music-btn-minimal {
 */
 .volume-vertical {
   position: relative;
-  width: 20px;  /* Ancho estrecho para que el slider rotado quepa verticalmente */
-  height: 120px; /* Alto suficiente para el slider + porcentaje */
+  width: 40px;  /* Ancho para acomodar el slider rotado */
+  height: 150px; /* Alto suficiente para slider + porcentaje */
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   opacity: 0;
   transform: translateY(10px);
   pointer-events: none;
   transition: all 0.3s ease;
-  gap: 8px;
+  gap: 0;
+  padding-top: 0;  /* Sin padding superior */
+}
+
+/* Wrapper para el slider que maneja la rotación */
+.volume-vertical::before {
+  content: '';
+  display: block;
+  width: 100px;  /* Espacio para el slider horizontal */
+  height: 10px;
+  position: absolute;
+  top: 75px;  /* Centrado vertical ajustado */
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
 }
 
 /* Mostrar por clic (togglear .controls-open) */
@@ -214,18 +228,22 @@ body.scrolling .music-player-minimal.controls-open .volume-vertical {
   cursor: pointer;
   transition: all 0.3s ease;
   
-  /* Rotar para hacerlo vertical - centrado perfectamente */
-  transform: rotate(-90deg);
-  transform-origin: center center;
+  /* Posicionamiento absoluto para control total */
+  position: absolute;
+  top: 60px;
+  left: 50%;
   
-  /* Asegurar que esté centrado en su contenedor */
-  position: relative;
-  margin: 0;
+  /* CLAVE: Invertir horizontalmente Y rotar */
+  /* scale(-1, 1) invierte horizontalmente (0% y 100% cambian de lado) */
+  /* rotate(-90deg) lo pone vertical */
+  transform: translateX(-50%) scale(-1, 1) rotate(-90deg);
+  transform-origin: center center;
   
   /* Eliminar estilos por defecto */
   -webkit-tap-highlight-color: transparent;
   border: none;
   padding: 0;
+  margin: 0;
 }
 
 .volume-slider-vertical:hover,
@@ -248,6 +266,14 @@ body.scrolling .music-player-minimal.controls-open .volume-vertical {
   box-shadow: 0 2px 8px rgba(125,157,181,.4);
   transition: all 0.2s ease;
   border: none;
+  
+  /* CRÍTICO: El slider tiene scale(-1, 1), así que el thumb también está invertido */
+  /* Necesitamos contra-invertir el thumb para que quede centrado */
+  transform: scale(-1, 1);
+  
+  /* Centrar el thumb */
+  margin-top: 0;
+  position: relative;
 }
 
 /* Thumb más grande en dispositivos táctiles */
@@ -273,6 +299,12 @@ body.scrolling .music-player-minimal.controls-open .volume-vertical {
   border: none;
   box-shadow: 0 2px 8px rgba(125,157,181,.4);
   transition: all 0.2s ease;
+  
+  /* CRÍTICO: Contra-invertir el thumb para compensar el scale(-1,1) del slider */
+  transform: scale(-1, 1);
+  
+  /* Centrar el thumb en la barra */
+  position: relative;
 }
 
 /* Thumb más grande en dispositivos táctiles */
@@ -419,7 +451,12 @@ body.scrolling .music-player-minimal.controls-open .volume-vertical {
 .volume-slider::-moz-range-thumb:hover{ transform:scale(1.2); }
 .volume-percent{
   font-family:'Montserrat',sans-serif; font-size:11px; font-weight:600; color:var(--slate-blue);
-  min-width:32px; text-align:right; flex-shrink:0;
+  min-width:32px; text-align:center; flex-shrink:0;
+  position: absolute;
+  bottom: 10px;  /* Posición desde abajo */
+  left: 50%;
+  transform: translateX(-50%);
+  display: block;
 }
 
 /* ===== CONTROL DE TAMAÑO DE LETRA ===== */

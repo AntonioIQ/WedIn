@@ -208,8 +208,8 @@ function wireMusicPlayer() {
     // Función para actualizar el slider visualmente
     function updateVolumeSlider(value) {
       const percentage = value;
-      // Crear gradiente para slider horizontal (que rotaremos)
-      // De izquierda (0%) a derecha (100%), pero visualmente será de abajo hacia arriba
+      // Gradiente simple de izquierda a derecha
+      // Con scale(-1, 1) + rotate(-90deg) se verá correctamente
       const gradient = `linear-gradient(to right, #7d9db5 0%, #7d9db5 ${percentage}%, #e0e0e0 ${percentage}%, #e0e0e0 100%)`;
       volumeSlider.style.background = gradient;
       
@@ -262,12 +262,11 @@ function wireMusicPlayer() {
     if (isTouchDevice) {
       volumeSlider.addEventListener('touchstart', (e) => {
         e.stopPropagation();
-        console.log('👆 Iniciando ajuste de volumen - valor actual:', volumeSlider.value);
+        console.log('👆 Iniciando ajuste de volumen - valor:', volumeSlider.value + '%');
       });
       
       volumeSlider.addEventListener('touchmove', (e) => {
         e.stopPropagation();
-        // Log mientras se mueve
         const currentVolume = parseInt(volumeSlider.value);
         console.log(`📊 Moviendo slider: ${currentVolume}%`);
       });
