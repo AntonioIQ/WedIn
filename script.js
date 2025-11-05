@@ -10,6 +10,7 @@ const FORM_PREFILL_KEYS = ["nombre", "pases", "mesa", "invitacion"];
 // Configuración de YouTube
 const YOUTUBE_VIDEO_ID = "w11tnVnoYM8";
 const SONG_NAME = "Música para nuestra boda";
+const EVENT_DATE = new Date("2025-11-29T16:30:00-06:00");
 
 // ==================== VARIABLES GLOBALES ====================
 let youtubePlayer = null;
@@ -454,6 +455,69 @@ function wireRSVPButton() {
 
 
 /* ============================================================================
+   CONTADOR REGRESIVO
+   ========================================================================== */
+
+const SECOND = 1000;
+const MINUTE = SECOND * 60;
+const HOUR = MINUTE * 60;
+const DAY = HOUR * 24;
+
+function startCountdown() {
+  const countdown = document.querySelector('.countdown');
+  if (!countdown || Number.isNaN(EVENT_DATE.getTime())) return;
+
+  const values = {};
+  $$('.countdown__value', countdown).forEach(el => {
+    const unit = el.dataset.unit;
+    if (unit) values[unit] = el;
+  });
+
+  const titleEl = $('.countdown__title', countdown);
+  const subtitleEl = $('.countdown__subtitle', countdown);
+
+  function setValues({ days, hours, minutes, seconds }) {
+    if (values.days) values.days.textContent = String(days).padStart(2, '0');
+    if (values.hours) values.hours.textContent = String(hours).padStart(2, '0');
+    if (values.minutes) values.minutes.textContent = String(minutes).padStart(2, '0');
+    if (values.seconds) values.seconds.textContent = String(seconds).padStart(2, '0');
+  }
+
+  let timer = null;
+
+  function update() {
+    const now = Date.now();
+    let diff = EVENT_DATE.getTime() - now;
+
+    if (diff <= 0) {
+      setValues({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+      if (titleEl) titleEl.textContent = '¡Es el gran día!';
+      if (subtitleEl) subtitleEl.textContent = 'Nos vemos muy pronto para celebrar juntos.';
+      if (timer) clearInterval(timer);
+      console.log('🎉 Contador completado');
+      return;
+    }
+
+    const days = Math.floor(diff / DAY);
+    diff -= days * DAY;
+
+    const hours = Math.floor(diff / HOUR);
+    diff -= hours * HOUR;
+
+    const minutes = Math.floor(diff / MINUTE);
+    diff -= minutes * MINUTE;
+
+    const seconds = Math.floor(diff / SECOND);
+    setValues({ days, hours, minutes, seconds });
+  }
+
+  update();
+  timer = setInterval(update, SECOND);
+  console.log('⏳ Contador regresivo inicializado');
+}
+
+
+/* ============================================================================
    SCROLL SUAVE Y ANIMACIONES
    ========================================================================== */
 
@@ -748,6 +812,7 @@ window.addEventListener("DOMContentLoaded", () => {
   enableSmoothScroll();
   enableRevealOnScroll();
   wireRSVPButton();
+  startCountdown();
   wireEnvelope();
   loadHistoria();
   preloadImages();
