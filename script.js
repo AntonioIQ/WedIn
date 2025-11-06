@@ -609,6 +609,12 @@ function openInvitation() {
       console.log("🎉 Transición completada, mostrando invitación...");
       
       document.body.classList.add("opened");
+      if (isTouchDevice) {
+        document.body.classList.add("player-hint");
+        setTimeout(() => {
+          document.body.classList.remove("player-hint");
+        }, prefersReducedMotion ? 2000 : 3500);
+      }
       
       // Limpiar optimizaciones
       if (closedImg) closedImg.style.willChange = "auto";
