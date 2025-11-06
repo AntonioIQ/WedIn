@@ -148,7 +148,6 @@ body.touch-device .music-player-minimal {
 
 body.touch-device.scrolling .music-player-minimal,
 body.touch-device .music-player-minimal.controls-open,
-body.touch-device.player-hint .music-player-minimal,
 body.touch-device .music-player-minimal:focus-within {
   opacity: 1;
   transform: translateY(0);
@@ -231,18 +230,6 @@ body.scrolling .music-btn-minimal {
 }
 
 /* Wrapper para el slider que maneja la rotación */
-.volume-vertical::before {
-  content: '';
-  display: block;
-  width: 110px;
-  height: 8px;
-  position: absolute;
-  top: 82px;
-  left: 50%;
-  transform: translateX(-50%);
-  pointer-events: none;
-}
-
 /* Mostrar por clic (togglear .controls-open) */
 .music-player-minimal.controls-open .volume-vertical {
   opacity: 1;
@@ -293,7 +280,7 @@ body.scrolling .music-player-minimal.controls-open .volume-vertical {
   
   /* Slider HORIZONTAL que rotaremos con transform */
   width: 100px;
-  height: 6px;
+  height: 4px;
   
   /* Color sólido simple */
   background: #e0e0e0;
@@ -322,7 +309,7 @@ body.scrolling .music-player-minimal.controls-open .volume-vertical {
 
 .volume-slider-vertical:hover,
 .volume-slider-vertical:active {
-  height: 8px;
+  height: 6px;
 }
 
 /* ===== SLIDER THUMB - WebKit (Safari/iOS) ===== */
@@ -426,14 +413,9 @@ body.scrolling .music-player-minimal.controls-open .volume-vertical {
     padding-top: 8px;
   }
 
-  .volume-vertical::before {
-    top: 70px;
-    width: 96px;
-  }
-  
   .volume-slider-vertical { 
-    height: 90px; 
-    width: 98px;
+    width: 96px;
+    height: 4px;
     top: 62px;
   }
   

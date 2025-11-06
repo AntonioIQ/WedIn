@@ -609,12 +609,6 @@ function openInvitation() {
       console.log("🎉 Transición completada, mostrando invitación...");
       
       document.body.classList.add("opened");
-      if (isTouchDevice) {
-        document.body.classList.add("player-hint");
-        setTimeout(() => {
-          document.body.classList.remove("player-hint");
-        }, prefersReducedMotion ? 2000 : 3500);
-      }
       
       // Limpiar optimizaciones
       if (closedImg) closedImg.style.willChange = "auto";
@@ -879,6 +873,14 @@ function wireSongbook() {
     modal.classList.add("open");
     modal.setAttribute("aria-hidden", "false");
     document.body.classList.add("modal-open");
+    if (isTouchDevice && youtubePlayer && playerReady && isPlaying) {
+      try {
+        youtubePlayer.pauseVideo();
+        console.log("⏸️ Música pausada para leer himnos en móvil");
+      } catch (err) {
+        console.error("❌ No se pudo pausar la música:", err);
+      }
+    }
 
     if (!songbookLoaded) loadCancionero();
 
