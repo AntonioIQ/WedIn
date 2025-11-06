@@ -11,6 +11,8 @@ const FORM_PREFILL_KEYS = ["nombre", "pases", "mesa", "invitacion"];
 const YOUTUBE_VIDEO_ID = "w11tnVnoYM8";
 const SONG_NAME = "Música para nuestra boda";
 const EVENT_DATE = new Date("2025-11-29T16:30:00-06:00");
+const MOBILE_BREAKPOINT = 1024;
+const mobileViewport = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT}px)`);
 
 // ==================== VARIABLES GLOBALES ====================
 let youtubePlayer = null;
@@ -19,6 +21,10 @@ let playerReady = false;
 let isTouchDevice = false;
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 let songbookLoaded = false;
+
+function isMobileExperience() {
+  return isTouchDevice && mobileViewport.matches;
+}
 
 // ==================== HELPERS ====================
 // Selección rápida de elementos
@@ -873,7 +879,8 @@ function wireSongbook() {
     modal.classList.add("open");
     modal.setAttribute("aria-hidden", "false");
     document.body.classList.add("modal-open");
-    if (isTouchDevice && youtubePlayer && playerReady && isPlaying) {
+    const pauseForSongbook = isMobileExperience();
+    if (pauseForSongbook && youtubePlayer && playerReady && isPlaying) {
       try {
         youtubePlayer.pauseVideo();
         console.log("⏸️ Música pausada para leer himnos en móvil");
