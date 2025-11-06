@@ -7,7 +7,7 @@
   <meta name="description" content="Invitación de boda: fecha, historia, lugar, calendario y confirmación de asistencia." />
   
   <!-- Favicon -->
-  <link rel="icon" href="images/favicon.png" type="image/png">
+  <link rel="icon" href="images/icon.jpg" type="image/jpeg">
   
   <!-- Meta tags para redes sociales -->
   <meta property="og:title" content="✨ Es un honor para nosotros invitarte">
@@ -37,7 +37,7 @@
       <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
     </svg>
   </button>
- 
+
   <!-- Barra de volumen vertical -->
   <div class="volume-vertical">
     <input 
@@ -78,9 +78,9 @@
   <div id="envelope-overlay" class="envelope-overlay">
     <div class="envelope">
       <!-- Sobre cerrado -->
-      <img class="envelope__img envelope__img--closed" src="images/envelope.jpg" alt="Sobre de invitación cerrado" />
+      <img class="envelope__img envelope__img--closed" src="images/envelope.jpg" alt="Sobre de invitación cerrado" fetchpriority="high" decoding="async" />
       <!-- Sobre abierto -->
-      <img class="envelope__img envelope__img--open" src="images/envelope-open.jpg" alt="Sobre de invitación abierto" />
+      <img class="envelope__img envelope__img--open" src="images/envelope-open.jpg" alt="Sobre de invitación abierto" loading="lazy" decoding="async" />
       <!-- Texto SOLO en el sobre cerrado -->
       <div class="envelope__text">
         <h2>Estás invitado</h2>
@@ -123,7 +123,7 @@
   <!-- Fotografía de la pareja -->
   <section class="nuestra-foto">
     <div class="foto-container">
-      <img src="images/nosotros.jpg" alt="Christian Areli y José Antonio sonriendo" />
+      <img src="images/nosotros.jpg" alt="Christian Areli y José Antonio sonriendo" loading="lazy" decoding="async" />
     </div>
   </section>
 
@@ -183,6 +183,21 @@
         </div>
       </section>
 
+      <!-- ==================== CANCIONERO ==================== -->
+      <section id="cancionero" class="section">
+        <div class="songbook-card">
+          <div class="songbook-card__body">
+            <h2 class="section-title">Himnos</h2>
+            <p class="songbook-card__text">
+              Estos son los himnos que entonaremos durante la celebración. Te invitamos a leerlos con calma y prepararte para cantarlos con nosotros.
+            </p>
+          </div>
+          <div class="songbook-card__actions">
+            <button class="btn btn--outline songbook-open" type="button">Ver himnos</button>
+          </div>
+        </div>
+      </section>
+
       <!-- ==================== CEREMONIA CON ITINERARIO ==================== -->
       <!-- Información del evento con horarios y actividades -->
       <section id="ceremonia" class="section">
@@ -197,22 +212,52 @@
             </div>
             
             <!-- ITINERARIO DEL DÍA -->
-            <div class="itinerario">
-              <h3 class="itinerario-title">Itinerario del Día</h3>
-              <ol class="itinerario-list">
-                <li class="itinerario-item">Recepción</li>
-                <li class="itinerario-item">Acto civil</li>
-                <li class="itinerario-item">
-                  Bendición y votos:
-                  <ul class="itinerario-sublist">
+            <div class="timeline">
+              <h3 class="timeline__title">Itinerario del día</h3>
+              <div class="timeline__item">
+                <span class="timeline__dot" aria-hidden="true"></span>
+                <div class="timeline__content">
+                  <span class="timeline__label">16:30</span>
+                  <p class="timeline__heading">Recepción</p>
+                  <p class="timeline__text">Nos dará tanto gusto abrazarte y compartir los primeros momentos de esta tarde con tu compañía.</p>
+                </div>
+              </div>
+              <div class="timeline__item">
+                <span class="timeline__dot" aria-hidden="true"></span>
+                <div class="timeline__content">
+                  <span class="timeline__label">17:00</span>
+                  <p class="timeline__heading">Acto civil</p>
+                  <p class="timeline__text">Compartiremos el momento en que formalizamos nuestra unión.</p>
+                </div>
+              </div>
+              <div class="timeline__item">
+                <span class="timeline__dot" aria-hidden="true"></span>
+                <div class="timeline__content">
+                  <span class="timeline__label">17:45</span>
+                  <p class="timeline__heading">Bendición y votos</p>
+                  <ul class="timeline__list">
                     <li>Bendición de los padres</li>
                     <li>Intercambio de promesas</li>
                     <li>Mensaje pastoral</li>
                   </ul>
-                </li>
-                <li class="itinerario-item">Cena</li>
-                <li class="itinerario-item">Tiempo abierto para las palabras de los invitados</li>
-              </ol>
+                </div>
+              </div>
+              <div class="timeline__item">
+                <span class="timeline__dot" aria-hidden="true"></span>
+                <div class="timeline__content">
+                  <span class="timeline__label">19:00</span>
+                  <p class="timeline__heading">Cena</p>
+                  <p class="timeline__text">Será un regalo compartir los alimentos contigo, agradeciendo a Dios por este momento y por tu amistad.</p>
+                </div>
+              </div>
+              <div class="timeline__item">
+                <span class="timeline__dot" aria-hidden="true"></span>
+                <div class="timeline__content">
+                  <span class="timeline__label">20:00</span>
+                  <p class="timeline__heading">Palabras y celebración</p>
+                  <p class="timeline__text">Abrimos el micrófono para que compartas un mensaje especial.</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -229,7 +274,7 @@
           </div>
           <div class="calendar__right">
             <h3>Aparta en tu agenda este día</h3>
-            <p> </p>
+            <p>Anota la fecha y acompáñanos en una tarde llena de gratitud y alegría.</p>
             <a class="btn btn--coffee" href="images/nuestra-boda.ics" download>Guarda a mi calendario</a>
           </div>
         </div>
@@ -279,7 +324,24 @@
     <span class="scroll-indicator__text">Desliza</span>
     <div class="scroll-indicator__arrow"></div>
   </div>
-  
+
+  <!-- ==================== CANCIONERO MODAL ==================== -->
+  <div id="songbookModal" class="songbook-modal" aria-hidden="true">
+    <div class="songbook-modal__backdrop" data-songbook-close></div>
+    <div class="songbook-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="songbookTitle" tabindex="-1">
+      <header class="songbook-modal__header">
+        <h2 id="songbookTitle" class="songbook-modal__title">Himnos de la ceremonia</h2>
+        <button class="songbook-modal__close" type="button" aria-label="Cerrar cancionero" data-songbook-close>&times;</button>
+      </header>
+      <div class="songbook-modal__body" id="songbookContent" tabindex="0">
+        <p class="songbook-modal__loading">Cargando cancionero…</p>
+      </div>
+      <footer class="songbook-modal__footer">
+        <a href="#cancionero" class="btn btn--outline btn--ghost" data-songbook-close>Volver al menú</a>
+      </footer>
+    </div>
+  </div>
+
   <!-- ==================== SCRIPTS ==================== -->
   <!-- YouTube IFrame API -->
   <script src="https://www.youtube.com/iframe_api"></script>

@@ -17,6 +17,8 @@ let youtubePlayer = null;
 let isPlaying = false;
 let playerReady = false;
 let isTouchDevice = false;
+const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+let songbookLoaded = false;
 
 // ==================== HELPERS ====================
 // Selección rápida de elementos
@@ -166,6 +168,9 @@ function wireMusicPlayer() {
   const volumePercent = $('#volumePercent');
 
   if (!musicBtn) return;
+
+  updateSongName();
+  updateMusicStatus('Toca para escuchar');
 
   // ===== BOTÓN DE PLAY/PAUSE =====
   musicBtn.addEventListener('click', (e) => {
@@ -532,7 +537,7 @@ function enableSmoothScroll() {
       if (!target) return;
       
       e.preventDefault();
-      target.scrollIntoView({ behavior: "smooth" });
+      target.scrollIntoView({ behavior: prefersReducedMotion ? "auto" : "smooth" });
     });
   });
   
@@ -541,6 +546,16 @@ function enableSmoothScroll() {
 
 // ===== REVELAR ELEMENTOS AL HACER SCROLL =====
 function enableRevealOnScroll() {
+  const elements = $$(".section, .card, .calendar");
+
+  if (prefersReducedMotion) {
+    elements.forEach(el => {
+      el.style.opacity = "1";
+      el.style.transform = "none";
+    });
+    return;
+  }
+
   const obs = new IntersectionObserver((entries, o) => {
     entries.forEach(en => {
       if (en.isIntersecting) {
@@ -554,7 +569,7 @@ function enableRevealOnScroll() {
     rootMargin: "0px 0px -5% 0px"
   });
   
-  $$(".section, .card, .calendar").forEach(el => {
+  elements.forEach(el => {
     el.style.opacity = "0";
     el.style.transform = "translateY(20px)";
     el.style.transition = "opacity 0.6s ease, transform 0.6s ease";
@@ -580,6 +595,7 @@ function openInvitation() {
   if (envelope) {
     const closedImg = $(".envelope__img--closed");
     const openImg = $(".envelope__img--open");
+    const autoplayDelays = prefersReducedMotion ? [0] : [0, 700, 1400];
     
     // Optimización de rendimiento
     if (closedImg) closedImg.style.willChange = "opacity, transform, filter";
@@ -589,8 +605,7 @@ function openInvitation() {
     envelope.classList.add("opening");
     if (sealBtn) sealBtn.style.pointerEvents = "none";
     
-    // Completar transición
-    setTimeout(() => {
+    const finishOpening = () => {
       console.log("🎉 Transición completada, mostrando invitación...");
       
       document.body.classList.add("opened");
@@ -600,7 +615,7 @@ function openInvitation() {
       if (openImg) openImg.style.willChange = "auto";
       
       // Scroll suave al inicio
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      window.scrollTo({ top: 0, behavior: prefersReducedMotion ? "auto" : "smooth" });
       
       // Enfocar el header para accesibilidad
       const header = $("header");
@@ -609,53 +624,39 @@ function openInvitation() {
         setTimeout(() => {
           header.focus();
           header.removeAttribute("tabindex");
-        }, 200);
+        }, prefersReducedMotion ? 80 : 200);
       }
       
       // ========== 🎵 REPRODUCIR MÚSICA AUTOMÁTICAMENTE ==========
-      // Después de abrir el sobre, iniciar la música
-      // iOS Safari requiere intentos múltiples y tiempo extra
-      setTimeout(() => {
-        if (youtubePlayer && playerReady) {
-          // Intento 1: inmediato
-          try {
-            youtubePlayer.playVideo();
-            console.log('🎵 Intento 1: Reproduciendo música');
-          } catch (error) {
-            console.log('⚠️ Intento 1 falló');
-          }
-          
-          // Intento 2: después de 800ms (para iOS)
-          setTimeout(() => {
-            if (!isPlaying && youtubePlayer) {
-              try {
-                youtubePlayer.playVideo();
-                console.log('🎵 Intento 2: Reproduciendo música');
-              } catch (error) {
-                console.log('⚠️ Intento 2 falló');
-              }
-            }
-          }, 800);
-          
-          // Intento 3: después de 1500ms (último intento para iOS)
-          setTimeout(() => {
-            if (!isPlaying && youtubePlayer) {
-              try {
-                youtubePlayer.playVideo();
-                console.log('🎵 Intento 3: Reproduciendo música');
-              } catch (error) {
-                console.log('⚠️ Autoplay bloqueado - usuario debe tocar botón');
-              }
-            }
-          }, 1500);
-          
-        } else {
-          console.log('⏳ Reproductor aún no está listo para autoplay');
+      const attemptAutoplay = () => {
+        if (!youtubePlayer || !playerReady) {
+          console.log("⏳ Reproductor aún no está listo para autoplay");
+          return;
         }
-      }, 500);
+
+        autoplayDelays.forEach((delay, index) => {
+          setTimeout(() => {
+            if (!youtubePlayer || !playerReady || isPlaying) return;
+            try {
+              youtubePlayer.playVideo();
+              console.log(`🎵 Intento ${index + 1}: Reproduciendo música`);
+            } catch (error) {
+              if (index === autoplayDelays.length - 1) {
+                console.log("⚠️ Autoplay bloqueado - toca el botón para escuchar la música");
+              } else {
+                console.log(`⚠️ Intento ${index + 1} falló`);
+              }
+            }
+          }, delay);
+        });
+      };
+
+      setTimeout(attemptAutoplay, prefersReducedMotion ? 200 : 500);
       // ========================================================
-      
-    }, 1550);
+    };
+
+    const animationDuration = prefersReducedMotion ? 900 : 1550;
+    setTimeout(finishOpening, animationDuration);
   }
 }
 
@@ -729,7 +730,15 @@ async function loadHistoria() {
     
     // Convertir párrafos separados por líneas en blanco
     const parts = clean.split(/\n\s*\n/).map(p => p.replace(/\n/g, " ").trim());
-    el.innerHTML = parts.map(p => `<p>${p}</p>`).join("");
+    const fragment = document.createDocumentFragment();
+
+    parts.forEach(text => {
+      const paragraph = document.createElement("p");
+      paragraph.textContent = text;
+      fragment.appendChild(paragraph);
+    });
+
+    el.replaceChildren(fragment);
     
     console.log('📖 Historia cargada exitosamente');
     
@@ -737,6 +746,177 @@ async function loadHistoria() {
     el.innerHTML = `<p class="placeholder">Carga "<strong>historia.txt</strong>" en la raíz del sitio para mostrar su contenido aquí.</p>`;
     console.log('📖 Archivo historia.txt no encontrado (opcional)');
   }
+}
+
+
+/* ============================================================================
+   CANCIONERO (CARGA Y MODAL)
+   ========================================================================== */
+
+function parseSongbook(text) {
+  const lines = text.split(/\r?\n/);
+  const sections = [];
+  let i = 0;
+
+  while (i < lines.length) {
+    const current = lines[i].trim();
+
+    if (/^=+/.test(current)) {
+      i++;
+      while (i < lines.length && !lines[i].trim()) i++;
+
+      const title = (lines[i] || "Canción").trim();
+
+      i++;
+      if (i < lines.length && /^=+/.test(lines[i].trim())) i++;
+
+      const body = [];
+      while (i < lines.length && !/^=+/.test(lines[i].trim())) {
+        body.push(lines[i]);
+        i++;
+      }
+
+      const content = body.join("\n").trim();
+      if (title && content) {
+        sections.push({ title, content });
+      }
+    } else {
+      i++;
+    }
+  }
+
+  return sections;
+}
+
+async function loadCancionero() {
+  const container = $("#songbookContent");
+  if (!container || songbookLoaded) return;
+
+  try {
+    const res = await fetch("cancionero.txt", { cache: "no-store" });
+    if (!res.ok) throw new Error("Cancionero no disponible");
+
+    const txt = await res.text();
+    const entries = parseSongbook(txt);
+
+    if (!entries.length) {
+      container.innerHTML = `<p class="songbook-feedback">El cancionero aún no está disponible.</p>`;
+      return;
+    }
+
+    container.innerHTML = entries.map((entry, idx) => {
+      const paragraphs = entry.content
+        .split(/\n\s*\n/)
+        .map(par => `<p>${par.replace(/\n/g, "<br>")}</p>`)
+        .join("");
+
+      return `
+        <article class="songbook__section" id="song-${idx + 1}">
+          <header class="songbook__section-header">
+            <span class="songbook__section-index">${String(idx + 1).padStart(2, "0")}</span>
+            <h3>${entry.title}</h3>
+          </header>
+          <div class="songbook__lyrics">${paragraphs}</div>
+        </article>
+      `;
+    }).join("");
+
+    container.scrollTop = 0;
+    songbookLoaded = true;
+    console.log("🎵 Cancionero cargado exitosamente");
+  } catch (error) {
+    console.error("❌ Error al cargar cancionero:", error);
+    container.innerHTML = `<p class="songbook-feedback">No se pudo cargar el cancionero en este momento. Inténtalo más tarde.</p>`;
+  }
+}
+
+function wireSongbook() {
+  const modal = $("#songbookModal");
+  if (!modal) return;
+
+  const dialog = modal.querySelector(".songbook-modal__dialog");
+  const backdrop = modal.querySelector(".songbook-modal__backdrop");
+  const openButtons = $$(".songbook-open");
+  const closeTriggers = $$("[data-songbook-close]");
+
+  const focusableSelectors = [
+    "a[href]",
+    "button:not([disabled])",
+    "textarea:not([disabled])",
+    "input:not([disabled])",
+    "select:not([disabled])",
+    "[tabindex]:not([tabindex=\"-1\"])"
+  ];
+  let previouslyFocused = null;
+
+  function trapFocus(event) {
+    if (!modal.classList.contains("open")) return;
+    const focusables = Array.from(dialog.querySelectorAll(focusableSelectors.join(","))).filter(el => el.offsetParent !== null);
+    if (!focusables.length) return;
+
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+
+  function openSongbook() {
+    if (modal.classList.contains("open")) return;
+
+    previouslyFocused = document.activeElement;
+    modal.classList.add("open");
+    modal.setAttribute("aria-hidden", "false");
+    document.body.classList.add("modal-open");
+
+    if (!songbookLoaded) loadCancionero();
+
+    setTimeout(() => {
+      const focusTarget = dialog || modal;
+      focusTarget.focus();
+    }, 20);
+  }
+
+  function closeSongbook() {
+    modal.classList.remove("open");
+    modal.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("modal-open");
+    if (previouslyFocused && typeof previouslyFocused.focus === "function") {
+      previouslyFocused.focus();
+    }
+  }
+
+  openButtons.forEach(btn => {
+    btn.addEventListener("click", e => {
+      e.preventDefault();
+      openSongbook();
+    });
+  });
+
+  closeTriggers.forEach(btn => {
+    btn.addEventListener("click", e => {
+      e.preventDefault();
+      closeSongbook();
+    });
+  });
+
+  if (backdrop) {
+    backdrop.addEventListener("click", closeSongbook);
+  }
+
+  modal.addEventListener("keydown", e => {
+    if (e.key === "Escape") {
+      e.preventDefault();
+      closeSongbook();
+    } else if (e.key === "Tab") {
+      trapFocus(e);
+    }
+  });
 }
 
 
@@ -814,6 +994,7 @@ window.addEventListener("DOMContentLoaded", () => {
   wireRSVPButton();
   startCountdown();
   wireEnvelope();
+  wireSongbook();
   loadHistoria();
   preloadImages();
   
