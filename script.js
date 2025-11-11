@@ -437,31 +437,17 @@ function wireFontSlider() {
    RSVP - CONFIRMACIÓN DE ASISTENCIA
    ========================================================================== */
 
+// NOTA: El periodo de registro ha finalizado
+// Funcionalidad deshabilitada
+
 function buildRSVPUrl() {
-  const params = new URLSearchParams(window.location.search);
-  const pairs = FORM_PREFILL_KEYS.map(k => {
-    const v = params.get(k);
-    return v ? `${k}=${encodeURIComponent(v)}` : null;
-  }).filter(Boolean);
-  
-  let url = FORM_URL_BASE;
-  if (pairs.length) url += '&' + pairs.join('&');
-  
-  return url;
+  // Deshabilitado - periodo de registro finalizado
+  return null;
 }
 
 function wireRSVPButton() {
-  const btn = $('#rsvpBtn');
-  if (!btn) return;
-  
-  btn.addEventListener('click', e => {
-    e.preventDefault();
-    const url = buildRSVPUrl();
-    console.log('📝 Abriendo formulario RSVP:', url);
-    window.open(url, '_blank');
-  });
-  
-  console.log('📝 Botón RSVP configurado');
+  // Deshabilitado - el botón RSVP ya no existe
+  console.log('ℹ️ Periodo de registro finalizado');
 }
 
 
