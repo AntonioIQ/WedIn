@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Himnos y Lecturas - Christian Areli & José Antonio</title>
+
+  <!-- Fuentes -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Great+Vibes&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ===== RESET Y VARIABLES ===== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      /* Paleta de colores de la invitación */
+      --bg-1: #f7ede0;
+      --bg-2: #d8c6b2;
+      --paper: #fffaf5;
+      --ink-1: #2b2623;
+      --ink-2: #5c524c;
+      --dusty-blue: #c87640;
+      --dusty-blue-2: #e9975b;
+      --slate-blue: #8f4930;
+      --slate-blue-2: #5f2c1a;
+      --accent: #dfa86a;
+      --cream: #f8e7d5;
+      --leaf: #6f8b6d;
+      --forest: #425948;
+    }
+
+    /* ===== ESTILOS GENERALES ===== */
+    body {
+      font-family: 'Montserrat', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(160deg, var(--bg-1) 0%, var(--bg-2) 100%);
+      color: var(--ink-1);
+      line-height: 1.75;
+      padding: 0;
+      margin: 0;
+      -webkit-font-smoothing: antialiased;
+      font-size: 18px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    /* ===== HEADER ===== */
+    .header {
+      text-align: center;
+      margin-bottom: 50px;
+      padding: 40px 20px;
+      background: linear-gradient(135deg, var(--dusty-blue) 0%, var(--slate-blue) 100%);
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(18, 21, 26, 0.25);
+      color: #ffffff;
+    }
+
+    .names {
+      font-family: 'Great Vibes', 'Cormorant Garamond', serif;
+      font-size: clamp(3.5rem, 10vw, 5.5rem);
+      margin-bottom: 15px;
+      text-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .ampersand {
+      font-size: 1.3em;
+      color: var(--accent);
+      margin: 0 0.3em;
+    }
+
+    .date {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.6rem, 4vw, 2.2rem);
+      margin-bottom: 18px;
+      letter-spacing: 2px;
+    }
+
+    .subtitle {
+      font-family: 'Montserrat', sans-serif;
+      font-size: clamp(1.2rem, 3vw, 1.5rem);
+      opacity: 0.9;
+      font-weight: 300;
+      letter-spacing: 1px;
+    }
+
+    /* ===== SECCIONES ===== */
+    .section {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 18px;
+      padding: clamp(30px, 5vw, 45px) clamp(25px, 4vw, 40px);
+      margin-bottom: 40px;
+      box-shadow: 0 15px 40px rgba(109, 47, 19, 0.15);
+      border: 1px solid rgba(223, 168, 106, 0.25);
+    }
+
+    .section-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.2rem, 5vw, 3rem);
+      color: var(--slate-blue);
+      margin-bottom: 30px;
+      text-align: center;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      border-bottom: 3px solid var(--dusty-blue);
+      padding-bottom: 18px;
+    }
+
+    /* ===== HIMNOS ===== */
+    .hymn {
+      background: rgba(255, 255, 255, 0.7);
+      border-left: 4px solid var(--dusty-blue);
+      border-radius: 12px;
+      padding: clamp(20px, 4vw, 30px);
+      margin-bottom: 30px;
+      box-shadow: 0 8px 20px rgba(109, 47, 19, 0.1);
+    }
+
+    .hymn-header {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+
+    .hymn-number {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: clamp(1rem, 2.5vw, 1.2rem);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(43, 38, 35, 0.6);
+      min-width: 50px;
+    }
+
+    .hymn-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.7rem, 4vw, 2.2rem);
+      color: var(--slate-blue-2);
+      font-weight: 600;
+      flex: 1;
+    }
+
+    .hymn-lyrics {
+      font-size: clamp(1.3rem, 3.5vw, 1.5rem);
+      line-height: 1.85;
+      color: var(--ink-2);
+      white-space: pre-line;
+    }
+
+    .hymn-lyrics p {
+      margin-bottom: 18px;
+    }
+
+    .hymn-lyrics strong {
+      font-size: 1.05em;
+      color: var(--slate-blue);
+    }
+
+    /* ===== LECTURAS ===== */
+    .reading {
+      background: rgba(255, 255, 255, 0.85);
+      border-left: 4px solid var(--leaf);
+      border-radius: 12px;
+      padding: clamp(20px, 4vw, 30px);
+      margin-bottom: 30px;
+      box-shadow: 0 8px 20px rgba(109, 47, 19, 0.1);
+    }
+
+    .reading-header {
+      margin-bottom: 18px;
+    }
+
+    .reading-label {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: clamp(1rem, 2.5vw, 1.2rem);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: rgba(43, 38, 35, 0.6);
+      margin-bottom: 10px;
+    }
+
+    .reading-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.7rem, 4vw, 2.2rem);
+      color: var(--forest);
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .reading-version {
+      display: inline-block;
+      font-size: clamp(0.95rem, 2.5vw, 1.1rem);
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: rgba(111, 139, 109, 0.15);
+      color: var(--forest);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+
+    .reading-text {
+      font-size: clamp(1.3rem, 3.5vw, 1.5rem);
+      line-height: 1.9;
+      color: var(--ink-1);
+      white-space: pre-line;
+    }
+
+    .reading-text p {
+      margin-bottom: 16px;
+    }
+
+    .reading-text sup {
+      font-size: 0.75em;
+      color: var(--dusty-blue);
+      font-weight: 600;
+    }
+
+    .reading-text strong {
+      font-size: 1.05em;
+      color: var(--forest);
+    }
+
+    /* ===== FOOTER ===== */
+    .footer {
+      text-align: center;
+      padding: 30px 20px;
+      color: var(--ink-2);
+      font-size: clamp(1.1rem, 2.5vw, 1.3rem);
+      margin-top: 40px;
+      border-top: 2px solid rgba(223, 168, 106, 0.3);
+    }
+
+    .footer-hearts {
+      font-size: 1.4em;
+      color: var(--dusty-blue);
+      margin-bottom: 12px;
+    }
+
+    /* ===== ESTILOS DE IMPRESIÓN ===== */
+    @media print {
+      body {
+        background: white;
+        padding: 0;
+        margin: 0;
+      }
+
+      .container {
+        max-width: 100%;
+        padding: 15px;
+        margin: 0;
+      }
+
+      .header {
+        margin-bottom: 25px;
+        padding: 25px 15px;
+      }
+
+      .section {
+        box-shadow: none;
+        border: 1px solid #ddd;
+        margin-bottom: 20px;
+        padding: 20px 15px;
+      }
+
+      .section-title {
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+      }
+
+      .hymn, .reading {
+        box-shadow: none;
+        margin-bottom: 20px;
+        padding: 15px;
+      }
+
+      .footer {
+        margin-top: 20px;
+        padding: 20px 15px;
+      }
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 640px) {
+      .container {
+        padding: 20px 15px;
+      }
+
+      .header {
+        padding: 30px 20px;
+        margin-bottom: 35px;
+      }
+
+      .section {
+        padding: 25px 20px;
+        margin-bottom: 30px;
+      }
+
+      .hymn, .reading {
+        padding: 20px;
+        margin-bottom: 25px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- HEADER -->
+    <div class="header">
+      <h1 class="names">
+        Christian Areli <span class="ampersand">&</span> José Antonio
+      </h1>
+      <p class="date">29 • NOVIEMBRE • 2025</p>
+      <p class="subtitle">Himnos y Lecturas Bíblicas</p>
+    </div>
+
+    <!-- SECCIÓN DE HIMNOS -->
+    <section class="section">
+      <h2 class="section-title">Himnos de la Ceremonia</h2>
+
+      <article class="hymn">
+        <div class="hymn-header">
+          <span class="hymn-number">01</span>
+          <h3 class="hymn-title">Exaltaré Tu Santo Nombre (Salmo 34 y 23)</h3>
+        </div>
+        <div class="hymn-lyrics">
+          <p>Por siempre te bendigo,<br>
+          Mi boca te alabará.<br>
+          Exaltó tu nombre, Señor.</p>
+
+          <p>Al hombre humilde escucharás,<br>
+          De aflicciones lo librarás.<br>
+          Me gozaré exaltando al Señor.</p>
+
+          <p>Exaltaré tu santo Nombre, por siempre.<br>
+          Hoy clamó al Señor y sé que siempre me escuchará.</p>
+
+          <p>Exaltaré tu santo Nombre, por siempre.<br>
+          Exaltaré por siempre al Señor.</p>
+
+          <p>El Ángel de Jehová está con los que le temen,<br>
+          Los salvará y los librará del mal.</p>
+
+          <p>Aunque ande en valle de sombra de muerte,<br>
+          Nada me faltará.<br>
+          Me gozaré exaltando al Señor.</p>
+
+          <p>Exaltaré tu santo Nombre, por siempre.<br>
+          Hoy clamó al Señor y sé que siempre me escuchará.</p>
+
+          <p>Exaltaré tu santo Nombre, por siempre.<br>
+          Exaltaré por siempre al Señor.</p>
+        </div>
+      </article>
+
+      <article class="hymn">
+        <div class="hymn-header">
+          <span class="hymn-number">02</span>
+          <h3 class="hymn-title">Como el Ciervo Brama (Salmo 42)</h3>
+        </div>
+        <div class="hymn-lyrics">
+          <p>Como el ciervo brama por las aguas,<br>
+          así clamo por Ti, oh Dios.<br>
+          Mi alma tiene sed de Dios,<br>
+          del Dios vivo, del Dios de mi salvación.</p>
+
+          <p><strong>Coro:</strong><br>
+          Solo Tú eres mi roca,<br>
+          mi escudo y mi galardón.<br>
+          Solo Tú eres mi deseo,<br>
+          y quiero adorarte, oh Dios.</p>
+        </div>
+      </article>
+
+      <article class="hymn">
+        <div class="hymn-header">
+          <span class="hymn-number">03</span>
+          <h3 class="hymn-title">¿Qué Nos Separará? (Romanos 8:35)</h3>
+        </div>
+        <div class="hymn-lyrics">
+          <p>¿Qué nos separará del amor de Dios?<br>
+          ¿Qué nos separará del amor de Dios?</p>
+
+          <p>¿Tribulaciones, o angustias, persecuciones, o hambre<br>
+          o desnudez, peligro o espada, del amor del Señor?</p>
+        </div>
+      </article>
+
+      <article class="hymn">
+        <div class="hymn-header">
+          <span class="hymn-number">04</span>
+          <h3 class="hymn-title">Más Cerca, Oh Dios, de Ti</h3>
+        </div>
+        <div class="hymn-lyrics">
+          <p>Cerca de ti, Señor, quiero morar;<br>
+          Lo tierno de tu amor quiero gozar.<br>
+          Llena mi pobre ser<br>
+          Limpia mi corazón,<br>
+          Hazme tu rostro ver en comunión.</p>
+
+          <p>Pasos inciertos doy, el sol se va,<br>
+          Mas si contigo estoy no temo ya.<br>
+          Himnos de gratitud fervente cantaré,<br>
+          Y fiel a ti Jesús, siempre seré.</p>
+
+          <p>Día feliz veré creyendo en ti,<br>
+          En que habitaré cerca de ti.<br>
+          Mi voz alabará tu dulce nombre allí,<br>
+          Y mi alma gozará cerca de tí.</p>
+        </div>
+      </article>
+
+      <article class="hymn">
+        <div class="hymn-header">
+          <span class="hymn-number">05</span>
+          <h3 class="hymn-title">Sublime Gracia (Amazing Grace)</h3>
+        </div>
+        <div class="hymn-lyrics">
+          <p>Sublime gracia del Señor<br>
+          que a un pecador salvó;<br>
+          Fui ciego mas hoy miro yo,<br>
+          Perdido y Él me halló.</p>
+
+          <p>Su gracia me enseñó a temer,<br>
+          Mis dudas ahuyentó,<br>
+          ¡Oh cuán precioso fue a mi ser,<br>
+          Al dar mi corazón!</p>
+
+          <p>En los peligros o aflicción<br>
+          Que yo he tenido aquí<br>
+          Su gracia siempre me libró<br>
+          Y me guiará feliz.</p>
+
+          <p>Y cuando en Sión por siglos mil<br>
+          Brillando esté cual sol;<br>
+          Yo cantaré por siempre allí<br>
+          Su amor que me salvó.</p>
+        </div>
+      </article>
+    </section>
+
+    <!-- SECCIÓN DE LECTURAS -->
+    <section class="section">
+      <h2 class="section-title">Lecturas Bíblicas</h2>
+
+      <article class="reading">
+        <div class="reading-header">
+          <div class="reading-label">Lectura 1</div>
+          <h3 class="reading-title">Génesis 2:15-25</h3>
+          <span class="reading-version">PDT - Palabra de Dios para Todos</span>
+        </div>
+        <div class="reading-text">
+          <p><sup>15</sup> El SEÑOR Dios tomó al hombre y lo puso en el jardín del Edén para que lo cultivara y lo cuidara.</p>
+
+          <p><sup>16</sup> Luego el SEÑOR Dios le ordenó al hombre: «Puedes comer libremente de cualquier árbol en el jardín, <sup>17</sup> pero no debes comer del árbol del conocimiento del bien y del mal porque el día que lo hagas, sin duda morirás».</p>
+
+          <p><sup>18</sup> Entonces el SEÑOR Dios dijo: «No le hace bien al hombre estar solo; haré a un ser capaz de ayudarlo y que sea su aliado».</p>
+
+          <p><sup>19</sup> El SEÑOR Dios formó los animales silvestres y todas las aves del cielo. Los llevó al hombre para ver cómo los iba a llamar y con ese nombre se quedó cada ser viviente. <sup>20</sup> El hombre les dio nombre a los animales domesticados, a las aves y a los animales silvestres; pero ninguno resultó capaz de formar pareja con él para ayudarlo.</p>
+
+          <p><sup>21</sup> Entonces el SEÑOR Dios hizo que el hombre durmiera profundamente y, mientras dormía, le quitó una parte de su costado y rellenó esa parte con carne. <sup>22</sup> Después, de esa parte del costado, el SEÑOR Dios hizo una mujer y se la llevó al hombre.</p>
+
+          <p><sup>23</sup> El hombre dijo:<br>
+          «¡Al fin! ¡Esta es hueso de mis huesos<br>
+          y carne de mi carne!<br>
+          La llamaré "mujer",<br>
+          porque fue sacada del hombre».</p>
+
+          <p><sup>24</sup> Por esa razón el hombre deja a su papá y a su mamá, se une a su esposa y los dos se convierten en un solo ser. <sup>25</sup> Tanto el hombre como la mujer estaban desnudos, pero ninguno de los dos se avergonzaba por eso.</p>
+        </div>
+      </article>
+
+      <article class="reading">
+        <div class="reading-header">
+          <div class="reading-label">Lectura 2</div>
+          <h3 class="reading-title">Cantar de los Cantares 2:1-6, 13-16</h3>
+          <span class="reading-version">PDT - Palabra de Dios para Todos</span>
+        </div>
+        <div class="reading-text">
+          <p><strong>Canta la amada</strong><br>
+          <sup>1</sup> Yo soy tan solo una flor de Sarón,<br>
+          un lirio de los valles.</p>
+
+          <p><strong>Canta el amado</strong><br>
+          <sup>2</sup> Amada mía, entre todas las mujeres,<br>
+          tú eres para mí como un lirio entre los cardos.</p>
+
+          <p><strong>Canta la amada</strong><br>
+          <sup>3</sup> Amor mío, entre todos los hombres,<br>
+          tú eres para mí como un manzano entre los árboles silvestres.<br>
+          Me ha gustado descansar bajo su sombra<br>
+          y saborear su dulce fruto.<br>
+          <sup>4</sup> Él me llevó a la sala de banquetes<br>
+          y plantó su estandarte de amor sobre mí.<br>
+          <sup>5</sup> Denme de comer pasas<br>
+          y aliméntenme con manzanas,<br>
+          que estoy débil de tanto amar.<br>
+          <sup>6</sup> Él coloca uno de sus brazos bajo mi cabeza<br>
+          y con el otro me abraza.</p>
+
+          <p><sup>10</sup> Mi amado me dijo:<br>
+          «Levántate, amada mía;<br>
+          ven conmigo, preciosa.</p>
+
+          <p><sup>13</sup> La higuera madura sus higos<br>
+          y las viñas en flor esparcen su fragancia.<br>
+          Levántate, amada mía;<br>
+          ven conmigo, preciosa.<br>
+          <sup>14</sup> Paloma mía, que anidas en las grietas de las rocas<br>
+          y en los riscos de las montañas,<br>
+          déjame ver tu rostro, déjame oír tu voz;<br>
+          porque tu voz es dulce y hermoso es tu rostro».</p>
+
+          <p><sup>15</sup> Atrapen a los chacales,<br>
+          a esos chacales pequeños que arrasan las viñas,<br>
+          porque nuestra viña está ahora en flor.</p>
+
+          <p><sup>16</sup> ¡Él es mío y yo soy suya!<br>
+          Él apacienta su rebaño entre las flores de primavera.</p>
+        </div>
+      </article>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <p class="footer-hearts">♥ ♥ ♥</p>
+      <p>Christian Areli & José Antonio</p>
+      <p>29 de Noviembre, 2025</p>
+    </footer>
+  </div>
+</body>
+</html>

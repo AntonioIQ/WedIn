@@ -307,6 +307,31 @@
       </div>
       <div class="songbook-card__actions">
         <button class="btn btn--outline songbook-open" type="button">Ver himnos</button>
+        <a class="btn btn--outline" href="https://1drv.ms/b/c/3c0a19d1b86c076c/IQByCzRxW3J0RZyV-d2Jz1UYAdNDFERQWZzpq9pKvYhIGo4?e=DudwNS" target="_blank">Descargar PDF</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== LECTURAS ==================== -->
+  <section id="lecturas" class="section">
+    <div class="reading-card">
+      <div class="reading-card__body">
+        <h2 class="section-title section-title--light">Lecturas bíblicas</h2>
+        <p class="reading-card__text">
+          Pasajes bíblicos en versión <strong>PDT</strong>.
+        </p>
+        <div class="reading-card__highlights" role="list">
+          <article class="reading-card__highlight" role="listitem">
+            <h3>Génesis 2:15-25</h3>
+          </article>
+          <article class="reading-card__highlight" role="listitem">
+            <h3>Cantar de los Cantares 2</h3>
+          </article>
+        </div>
+      </div>
+      <div class="reading-card__actions">
+        <button class="btn btn--outline reading-open" type="button">Ver lecturas</button>
+        <a class="btn btn--outline" href="https://1drv.ms/b/c/3c0a19d1b86c076c/IQByCzRxW3J0RZyV-d2Jz1UYAdNDFERQWZzpq9pKvYhIGo4?e=DudwNS" id="downloadPdfBtn" target="_blank">Descargar PDF</a>
       </div>
     </div>
   </section>
@@ -334,6 +359,30 @@
       </div>
       <footer class="songbook-modal__footer">
         <a href="#cancionero" class="btn btn--outline btn--ghost" data-songbook-close>Volver al menú</a>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ==================== LECTURAS MODAL ==================== -->
+  <div id="readingModal" class="reading-modal" aria-hidden="true">
+    <div class="reading-modal__backdrop" data-reading-close></div>
+    <div class="reading-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="readingTitle" tabindex="-1">
+      <header class="reading-modal__header">
+        <div>
+          <h2 id="readingTitle" class="reading-modal__title">Lecturas bíblicas</h2>
+          <p class="reading-modal__subtitle">Versión PDT · Palabra de Dios para Todos</p>
+        </div>
+        <button class="reading-modal__close" type="button" aria-label="Cerrar lecturas" data-reading-close>&times;</button>
+      </header>
+      <div class="reading-modal__intro">
+        <p>Usa los accesos rápidos para saltar entre lecturas o desplázate para disfrutarlas de principio a fin.</p>
+      </div>
+      <nav id="readingNav" class="reading-modal__nav" aria-label="Selecciona una lectura"></nav>
+      <div class="reading-modal__body" id="readingContent" tabindex="0">
+        <p class="reading-modal__loading">Cargando lecturas…</p>
+      </div>
+      <footer class="reading-modal__footer">
+        <a href="#lecturas" class="btn btn--outline btn--ghost" data-reading-close>Volver al menú</a>
       </footer>
     </div>
   </div>

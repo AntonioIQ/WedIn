@@ -21,6 +21,7 @@ let playerReady = false;
 let isTouchDevice = false;
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 let songbookLoaded = false;
+let readingsLoaded = false;
 
 function isMobileExperience() {
   return isTouchDevice && mobileViewport.matches;
@@ -742,10 +743,10 @@ async function loadHistoria() {
 
 
 /* ============================================================================
-   CANCIONERO (CARGA Y MODAL)
+   CANCIONERO Y LECTURAS (CARGA Y MODALES)
    ========================================================================== */
 
-function parseSongbook(text) {
+function parseSections(text) {
   const lines = text.split(/\r?\n/);
   const sections = [];
   let i = 0;
@@ -757,7 +758,7 @@ function parseSongbook(text) {
       i++;
       while (i < lines.length && !lines[i].trim()) i++;
 
-      const title = (lines[i] || "Canción").trim();
+      const title = (lines[i] || "Sección").trim();
 
       i++;
       if (i < lines.length && /^=+/.test(lines[i].trim())) i++;
@@ -780,6 +781,139 @@ function parseSongbook(text) {
   return sections;
 }
 
+function extractReadingMeta(rawTitle = "", fallbackIndex = 1) {
+  const meta = {
+    heading: `Lectura ${fallbackIndex}`,
+    reference: rawTitle.trim(),
+    version: ""
+  };
+
+  if (!rawTitle) return meta;
+
+  const parts = rawTitle.split("·");
+  if (parts.length > 1) {
+    meta.heading = parts.shift().trim() || meta.heading;
+    meta.reference = parts.join("·").trim() || meta.reference;
+  } else {
+    meta.heading = rawTitle.trim() || meta.heading;
+  }
+
+  const versionMatch = meta.reference.match(/\(([^)]+)\)\s*$/);
+  if (versionMatch) {
+    meta.version = versionMatch[1].trim();
+    meta.reference = meta.reference.replace(/\(([^)]+)\)\s*$/, "").trim();
+  }
+
+  return meta;
+}
+
+function pauseMusicForModal(contextLabel = "modal") {
+  if (!isMobileExperience() || !youtubePlayer || !playerReady || !isPlaying) return;
+  try {
+    youtubePlayer.pauseVideo();
+    console.log(`⏸️ Música pausada para ${contextLabel}`);
+  } catch (err) {
+    console.error("❌ No se pudo pausar la música:", err);
+  }
+}
+
+function setupModal({
+  modalSelector,
+  dialogSelector,
+  openSelector,
+  closeSelector,
+  onOpen
+}) {
+  const modal = document.querySelector(modalSelector);
+  if (!modal) return null;
+
+  const dialog = dialogSelector ? modal.querySelector(dialogSelector) : modal;
+  const openButtons = openSelector ? Array.from(document.querySelectorAll(openSelector)) : [];
+  const closeTriggers = closeSelector ? Array.from(modal.querySelectorAll(closeSelector)) : [];
+
+  const focusableSelectors = [
+    "a[href]",
+    "button:not([disabled])",
+    "textarea:not([disabled])",
+    "input:not([disabled])",
+    "select:not([disabled])",
+    "[tabindex]:not([tabindex=\"-1\"])"
+  ];
+  let previouslyFocused = null;
+
+  function trapFocus(event) {
+    if (!modal.classList.contains("open")) return;
+    const root = dialog || modal;
+    const focusables = Array.from(root.querySelectorAll(focusableSelectors.join(","))).filter(el => el.offsetParent !== null);
+    if (!focusables.length) return;
+
+    const [first] = focusables;
+    const last = focusables[focusables.length - 1];
+
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+
+  function openModal() {
+    if (modal.classList.contains("open")) return;
+
+    previouslyFocused = document.activeElement;
+    modal.classList.add("open");
+    modal.setAttribute("aria-hidden", "false");
+    document.body.classList.add("modal-open");
+
+    if (typeof onOpen === "function") {
+      onOpen();
+    }
+
+    setTimeout(() => {
+      const focusTarget = dialog || modal;
+      if (focusTarget && typeof focusTarget.focus === "function") {
+        focusTarget.focus();
+      }
+    }, 20);
+  }
+
+  function closeModal() {
+    modal.classList.remove("open");
+    modal.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("modal-open");
+    if (previouslyFocused && typeof previouslyFocused.focus === "function") {
+      previouslyFocused.focus();
+    }
+  }
+
+  openButtons.forEach(btn => {
+    btn.addEventListener("click", e => {
+      e.preventDefault();
+      openModal();
+    });
+  });
+
+  closeTriggers.forEach(btn => {
+    btn.addEventListener("click", e => {
+      e.preventDefault();
+      closeModal();
+    });
+  });
+
+  modal.addEventListener("keydown", e => {
+    if (e.key === "Escape") {
+      e.preventDefault();
+      closeModal();
+    } else if (e.key === "Tab") {
+      trapFocus(e);
+    }
+  });
+
+  return { open: openModal, close: closeModal };
+}
+
 async function loadCancionero() {
   const container = $("#songbookContent");
   if (!container || songbookLoaded) return;
@@ -789,7 +923,7 @@ async function loadCancionero() {
     if (!res.ok) throw new Error("Cancionero no disponible");
 
     const txt = await res.text();
-    const entries = parseSongbook(txt);
+    const entries = parseSections(txt);
 
     if (!entries.length) {
       container.innerHTML = `<p class="songbook-feedback">El cancionero aún no está disponible.</p>`;
@@ -822,100 +956,141 @@ async function loadCancionero() {
   }
 }
 
-function wireSongbook() {
-  const modal = $("#songbookModal");
-  if (!modal) return;
+function emphasizeReadingSection(section) {
+  if (!section) return;
+  section.classList.add("reading__section--highlight");
+  setTimeout(() => section.classList.remove("reading__section--highlight"), 1400);
+}
 
-  const dialog = modal.querySelector(".songbook-modal__dialog");
-  const backdrop = modal.querySelector(".songbook-modal__backdrop");
-  const openButtons = $$(".songbook-open");
-  const closeTriggers = $$("[data-songbook-close]");
+async function loadLecturas() {
+  const container = $("#readingContent");
+  if (!container || readingsLoaded) return;
 
-  const focusableSelectors = [
-    "a[href]",
-    "button:not([disabled])",
-    "textarea:not([disabled])",
-    "input:not([disabled])",
-    "select:not([disabled])",
-    "[tabindex]:not([tabindex=\"-1\"])"
-  ];
-  let previouslyFocused = null;
+  try {
+    const res = await fetch("lectura.txt", { cache: "no-store" });
+    if (!res.ok) throw new Error("Lecturas no disponibles");
 
-  function trapFocus(event) {
-    if (!modal.classList.contains("open")) return;
-    const focusables = Array.from(dialog.querySelectorAll(focusableSelectors.join(","))).filter(el => el.offsetParent !== null);
-    if (!focusables.length) return;
+    const txt = await res.text();
+    const entries = parseSections(txt);
 
-    const first = focusables[0];
-    const last = focusables[focusables.length - 1];
-
-    if (event.shiftKey && document.activeElement === first) {
-      event.preventDefault();
-      last.focus();
-    } else if (!event.shiftKey && document.activeElement === last) {
-      event.preventDefault();
-      first.focus();
+    if (!entries.length) {
+      container.innerHTML = `<p class="reading-feedback">Las lecturas aún no están listas.</p>`;
+      return;
     }
+
+    container.innerHTML = entries.map((entry, idx) => {
+      const meta = extractReadingMeta(entry.title, idx + 1);
+      const paragraphs = entry.content
+        .split(/\n\s*\n/)
+        .map(par => `<p>${par.replace(/\n/g, "<br>").trim()}</p>`)
+        .join("");
+
+      return `
+        <article class="reading__section" id="reading-${idx + 1}">
+          <header class="reading__section-header">
+            <div class="reading__section-index">${meta.heading}</div>
+            <div class="reading__section-title">
+              <h3>${meta.reference || entry.title}</h3>
+              ${meta.version ? `<span class="reading__badge">${meta.version}</span>` : ""}
+            </div>
+          </header>
+           <div class="reading__text">${paragraphs}</div>
+        </article>
+      `;
+    }).join("");
+
+    const sections = Array.from(container.querySelectorAll(".reading__section"));
+    buildReadingNav(entries, sections, container);
+
+    container.scrollTop = 0;
+    readingsLoaded = true;
+    console.log("📖 Lecturas cargadas exitosamente");
+  } catch (error) {
+    console.error("❌ Error al cargar lecturas:", error);
+    container.innerHTML = `<p class="reading-feedback">No se pudieron cargar las lecturas. Inténtalo más tarde.</p>`;
   }
+}
 
-  function openSongbook() {
-    if (modal.classList.contains("open")) return;
+function buildReadingNav(entries, sections, container) {
+  const nav = $("#readingNav");
+  if (!nav) return;
 
-    previouslyFocused = document.activeElement;
-    modal.classList.add("open");
-    modal.setAttribute("aria-hidden", "false");
-    document.body.classList.add("modal-open");
-    const pauseForSongbook = isMobileExperience();
-    if (pauseForSongbook && youtubePlayer && playerReady && isPlaying) {
-      try {
-        youtubePlayer.pauseVideo();
-        console.log("⏸️ Música pausada para leer himnos en móvil");
-      } catch (err) {
-        console.error("❌ No se pudo pausar la música:", err);
+  nav.innerHTML = entries.map((entry, idx) => {
+    const meta = extractReadingMeta(entry.title, idx + 1);
+    const label = meta.reference || entry.title || `Lectura ${idx + 1}`;
+    return `<button type="button" class="reading-nav__btn" data-reading-target="reading-${idx + 1}" aria-controls="reading-${idx + 1}">${label}</button>`;
+  }).join("");
+
+  const buttons = Array.from(nav.querySelectorAll(".reading-nav__btn"));
+  if (!buttons.length) {
+    nav.classList.add("is-empty");
+    return;
+  }
+  nav.classList.remove("is-empty");
+
+  const activateButton = targetBtn => {
+    buttons.forEach(btn => {
+      const isActive = btn === targetBtn;
+      btn.classList.toggle("is-active", isActive);
+      btn.setAttribute("aria-current", isActive ? "true" : "false");
+    });
+  };
+
+  buttons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const targetId = btn.getAttribute("data-reading-target");
+      const target = sections.find(section => section.id === targetId);
+      if (target) {
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+        emphasizeReadingSection(target);
+        activateButton(btn);
       }
-    }
-
-    if (!songbookLoaded) loadCancionero();
-
-    setTimeout(() => {
-      const focusTarget = dialog || modal;
-      focusTarget.focus();
-    }, 20);
-  }
-
-  function closeSongbook() {
-    modal.classList.remove("open");
-    modal.setAttribute("aria-hidden", "true");
-    document.body.classList.remove("modal-open");
-    if (previouslyFocused && typeof previouslyFocused.focus === "function") {
-      previouslyFocused.focus();
-    }
-  }
-
-  openButtons.forEach(btn => {
-    btn.addEventListener("click", e => {
-      e.preventDefault();
-      openSongbook();
     });
   });
 
-  closeTriggers.forEach(btn => {
-    btn.addEventListener("click", e => {
-      e.preventDefault();
-      closeSongbook();
+  if ("IntersectionObserver" in window && container) {
+    const observer = new IntersectionObserver(entriesList => {
+      entriesList.forEach(entry => {
+        if (entry.isIntersecting) {
+          const btn = buttons.find(button => button.getAttribute("data-reading-target") === entry.target.id);
+          if (btn) activateButton(btn);
+        }
+      });
+    }, {
+      root: container,
+      threshold: 0.4
     });
-  });
 
-  if (backdrop) {
-    backdrop.addEventListener("click", closeSongbook);
+    sections.forEach(section => observer.observe(section));
   }
 
-  modal.addEventListener("keydown", e => {
-    if (e.key === "Escape") {
-      e.preventDefault();
-      closeSongbook();
-    } else if (e.key === "Tab") {
-      trapFocus(e);
+  if (buttons.length) {
+    activateButton(buttons[0]);
+  }
+}
+
+function wireSongbook() {
+  setupModal({
+    modalSelector: "#songbookModal",
+    dialogSelector: ".songbook-modal__dialog",
+    openSelector: ".songbook-open",
+    closeSelector: "[data-songbook-close]",
+    onOpen: () => {
+      pauseMusicForModal("leer himnos");
+      loadCancionero();
+    }
+  });
+}
+
+function wireReadings() {
+  setupModal({
+    modalSelector: "#readingModal",
+    dialogSelector: ".reading-modal__dialog",
+    openSelector: ".reading-open",
+    closeSelector: "[data-reading-close]",
+    onOpen: () => {
+      pauseMusicForModal("leer lecturas");
+      loadLecturas();
     }
   });
 }
@@ -996,6 +1171,7 @@ window.addEventListener("DOMContentLoaded", () => {
   startCountdown();
   wireEnvelope();
   wireSongbook();
+  wireReadings();
   loadHistoria();
   preloadImages();
   
